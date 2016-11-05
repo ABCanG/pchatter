@@ -33,6 +33,9 @@ gem 'react_on_rails'
 gem 'figaro'
 gem 'devise'
 gem 'omniauth-twitter'
+gem 'acts_as_hashids'
+gem 'simple_form'
+gem 'bootstrap-sass'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
@@ -57,6 +60,7 @@ group :development do
   gem 'annotate'
   gem 'bullet'
   gem 'foreman'
+  gem 'stackprof'
 end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem

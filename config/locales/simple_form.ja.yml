@@ -1,0 +1,25 @@
+ja:
+  simple_form:
+    'yes': 'はい'
+    'no': 'いいえ'
+    required:
+      text: '必須'
+      mark: '*'
+    error_notification:
+      default_message: "以下の問題を調査して下さい:"
+    labels:
+      defaults:
+      room:
+        name: '部屋名'
+        pass: '合言葉'
+    hints:
+      defaults:
+      room:
+        name: '63文字以内'
+        pass: '63文字以内'
+    placeholders:
+      defaults:
+    include_blanks:
+      defaults:
+    prompts:
+      defaults:
