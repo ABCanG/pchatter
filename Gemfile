@@ -31,12 +31,19 @@ gem 'jbuilder', '~> 2.5'
 
 gem 'react_on_rails'
 gem 'figaro'
+gem 'devise'
+gem 'omniauth-twitter'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug', platform: :mri
   gem 'pry-rails'
   gem 'pry-byebug'
+
+  gem 'rspec-rails'
+  gem 'factory_girl_rails'
+  gem 'database_cleaner'
+  gem 'spring-commands-rspec'
 end
 
 group :development do
