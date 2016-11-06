@@ -1,22 +1,52 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Pchatter</title>
-    <%= csrf_meta_tags %>
+<head>
+  <title>Pchatter</title>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <%= csrf_meta_tags %>
 
-    <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track': 'reload' %>
-    <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
-  </head>
+  <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track': 'reload' %>
+  <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
+</head>
 
-  <body>
-    <p class="notice"><%= notice %></p>
-    <p class="alert"><%= alert %></p>
-    <% if user_signed_in? %>
-      <%= link_to "Sign out", destroy_user_session_path %>
-    <% else %>
-      <%= link_to "Sign in", new_user_session_path %>
-    <% end %>
+<body>
 
+  <nav class="navbar navbar-default">
+    <div class="container">
+      <%= link_to 'pchatter', root_path, class: 'navbar-brand' %>
+
+      <ul class="nav navbar-right">
+        <% if user_signed_in? %>
+        <li><%= link_to '部屋を作る', new_room_path, class: 'navbar-link hidden-xs' %></li>
+
+        <li class="dropdown">
+          <a lass="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+            <%= image_tag current_user.icon_url, class: 'dropdown-icon' %>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-left">
+            <li><%= link_to '部屋を作る', new_room_path, class: 'visible-xs-inline' %></li>
+            <li><%= link_to "マイページ", user_path(current_user) %></li>
+            <li><%= link_to "ログアウト", destroy_user_session_path %></li>
+          </ul>
+        </li>
+        <% else %>
+        <li><%= link_to "ログイン", new_user_session_path, class: 'navbar-link' %></li>
+        <% end %>
+      </ul>
+    </div><!-- /.container -->
+  </nav>
+
+  <% flash.each do |name, msg| %>
+  <div class="alert alert-<%= name == "notice" ? "success" : "danger" %>">
+    <a class="close" data-dismiss="alert">×</a>
+    <%= msg %>
+  </div>
+  <% end %>
+
+  <div class="container">
     <%= yield %>
-  </body>
+  </div>
+</body>
 </html>

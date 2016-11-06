@@ -10,6 +10,7 @@ module ErrorHandlers
   end
 
   private
+
   def rescue403(e)
     @exception = e
     render file: 'public/403.html', status: 403
