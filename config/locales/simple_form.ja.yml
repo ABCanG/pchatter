@@ -12,6 +12,7 @@ ja:
       room:
         name: '部屋名'
         pass: '合言葉'
+        hidden: '入室者だけ絵を見れる'
     hints:
       defaults:
       room:

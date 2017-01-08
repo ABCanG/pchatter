@@ -8,7 +8,6 @@ Rails.application.routes.draw do
   end
   root 'home#index'
 
-  get 'hello_world', to: 'hello_world#index'
   resources :rooms
   resources :users, param: :screen_name, only: [:show, :index]
 end

@@ -36,6 +36,7 @@ gem 'omniauth-twitter'
 gem 'acts_as_hashids'
 gem 'simple_form'
 gem 'bootstrap-sass'
+gem 'mysql2'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console

@@ -1,5 +1,10 @@
-SECRET_KEY_BASE: "device key"
+SECRET_KEY_BASE: "secret key"
+SESSION_NAME: "_pchatter_session"
 GOOGLE_ANALYTICS: "UA-00000000-0"
 TWITTER_CONSUMER_KEY: ""
 TWITTER_CONSUMER_SECRET: ""
+DB_NAME: pchatter
+DB_USER: pchatter
+DB_PASS: password
+DB_SOCKET: /tmp/mysqld.sock
 ENABLE_STACKPROF: 0

@@ -1,5 +1,5 @@
 {
-  "name": "react-webpack-rails-tutorial",
+  "name": "pchatter",
   "version": "0.0.1",
   "engines": {
     "node": "5.10.0",
@@ -9,5 +9,6 @@
     "postinstall": "cd client && npm install",
     "start": "bundle exec foreman start -f Procfile.dev",
     "test": "rspec"
-  }
+  },
+  "dependencies": {}
 }
