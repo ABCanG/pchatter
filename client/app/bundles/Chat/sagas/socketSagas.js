@@ -2,10 +2,14 @@ import { eventChannel } from 'redux-saga';
 import { fork, take, put, call, select } from 'redux-saga/effects';
 import io from 'socket.io-client';
 
-import actionTypes from '../constants/chatConstants';
-import { successConnectChat, failureConnectChat,
+import chatActionTypes from '../constants/chatConstants';
+import canvasActionTypes from '../constants/canvasConstants';
+import {
+  successConnectChat, failureConnectChat,
   requestJoinChat, successJoinChat, failureJoinChat,
-  addChatLog, setUserList, setLogMessage } from '../actions/chatActionCreators';
+  addChatLog, setUserList, setLogMessage
+} from '../actions/chatActionCreators';
+import { clearTempPath, addPathToCanvas } from '../actions/canvasActionCreators';
 
 const socketIoURL = process.env.NODE_ENV === 'production' ? '' : 'http://localhost:4000';
 
@@ -26,6 +30,7 @@ function* handleSocketEvent(socket) {
     'join',
     'init',
     'log',
+    'path',
     'users',
     'disconnect',
   ]);
@@ -56,8 +61,9 @@ function* handleSocketEvent(socket) {
       }
 
       case 'init': {
-        const { logs, users } = data;
+        const { logs, paths, users } = data;
         yield put(addChatLog(logs));
+        yield put(addPathToCanvas(paths));
         yield put(setUserList(users));
         break;
       }
@@ -65,6 +71,12 @@ function* handleSocketEvent(socket) {
       case 'log': {
         const { log } = data;
         yield put(addChatLog([log]));
+        break;
+      }
+
+      case 'path': {
+        const { path } = data;
+        yield put(addPathToCanvas([path]));
         break;
       }
 
@@ -88,14 +100,14 @@ function* handleSocketEvent(socket) {
 
 function* handleRequestJoinChat(socket) {
   while (true) {
-    const { payload: { pass } } = yield take(actionTypes.REQUEST_JOIN_CHAT);
+    const { payload: { pass } } = yield take(chatActionTypes.REQUEST_JOIN_CHAT);
     socket.emit('join', { pass });
   }
 }
 
 function* handleSendLogMessage(socket) {
   while (true) {
-    const { payload: { message } } = yield take(actionTypes.SEND_LOG_MESSAGE);
+    const { payload: { message } } = yield take(chatActionTypes.SEND_LOG_MESSAGE);
     if (message) {
       socket.emit('log', { message });
       yield put(setLogMessage(''));
@@ -103,14 +115,28 @@ function* handleSendLogMessage(socket) {
   }
 }
 
+function* handleSendPath(socket) {
+  while (true) {
+    yield take(canvasActionTypes.SEND_TEMP_PATH);
+    const path = yield select((state) => ({
+      data: state.$$canvasStore.get('tempPath').toJS(),
+      style: state.$$canvasStore.get('style').toJS(),
+    }));
+
+    socket.emit('path', { path });
+    yield put(clearTempPath());
+  }
+}
+
 function* handleSocketSaga(socket) {
   yield fork(handleRequestJoinChat, socket);
   yield fork(handleSendLogMessage, socket);
+  yield fork(handleSendPath, socket);
   yield fork(handleSocketEvent, socket);
 }
 
 function* handleRequestConnectChat() {
-  const { payload: { id } } = yield take(actionTypes.REQUEST_CONNECT_CHAT);
+  const { payload: { id } } = yield take(chatActionTypes.REQUEST_CONNECT_CHAT);
   const socket = io.connect(`${socketIoURL}/chat?room=${id}`);
   yield fork(handleSocketSaga, socket);
 }

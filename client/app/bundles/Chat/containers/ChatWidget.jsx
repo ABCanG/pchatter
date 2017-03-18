@@ -1,10 +1,20 @@
 import React, { PropTypes } from 'react';
-import { Button, FormControl } from 'react-bootstrap';
+import { Button, Form, FormControl, Popover, OverlayTrigger } from 'react-bootstrap';
 import { connect } from 'react-redux';
 import Immutable from 'immutable';
 
-import { requestConnectChat, requestJoinChat, setLogMessage,
-  sendLogMessage, setRoomInfo, setRoomPass } from '../actions/chatActionCreators';
+import { SketchPicker } from 'react-color';
+
+import {
+  requestConnectChat, requestJoinChat, setLogMessage,
+  sendLogMessage, setRoomInfo, setRoomPass
+} from '../actions/chatActionCreators';
+import {
+  setStyleColor, setStyleAlpha,
+} from '../actions/canvasActionCreators';
+import DrawCanvas from './DrawCanvas';
+import PreviewCanvas from './PreviewCanvas';
+
 
 class ChatWidget extends React.Component {
   static propTypes = {
@@ -12,12 +22,18 @@ class ChatWidget extends React.Component {
       id: PropTypes.number.isRequired,
       pass: PropTypes.bool.isRequired,
       hidden: PropTypes.bool.isRequired,
-    }),
+    }).isRequired,
     join: PropTypes.bool.isRequired,
     logs: PropTypes.instanceOf(Immutable.Set).isRequired,
     users: PropTypes.instanceOf(Immutable.Map).isRequired,
     logMessage: PropTypes.string.isRequired,
     pass: PropTypes.string.isRequired,
+    color: PropTypes.shape({
+      r: PropTypes.number.isRequired,
+      g: PropTypes.number.isRequired,
+      b: PropTypes.number.isRequired,
+      a: PropTypes.number.isRequired,
+    }).isRequired,
     dispatch: PropTypes.func.isRequired,
   };
 
@@ -37,64 +53,114 @@ class ChatWidget extends React.Component {
     dispatch(setRoomPass(e.target.value));
   };
 
-  handleSendLogMessage = () => {
+  handleSendLogMessage = (e) => {
     const { dispatch, logMessage } = this.props;
+    e.preventDefault();
     dispatch(sendLogMessage(logMessage));
   };
 
-  handleJoinChat = () => {
+  handleJoinChat = (e) => {
     const { dispatch, pass } = this.props;
+    e.preventDefault();
     dispatch(requestJoinChat(pass));
   };
 
-  render() {
-    const { logs, users, logMessage, join, roomInfo, pass } = this.props;
+  handleChangeColor = (color) => {
+    const { dispatch } = this.props;
+    dispatch(setStyleColor(color.rgb));
+  }
+
+  renderPopoverUserList() {
+    const { users } = this.props;
 
     return (
-      <div>
-        <ul>
-          {logs.map((log) => <li key={log.get('id')}>{log.get('message')}</li>)}
-        </ul>
-        ユーザリスト
-        <ul>
-          {users.valueSeq().map((user) => <li key={user.get('id')}>@{user.get('screen_name')}</li>)}
-        </ul>
+      <Popover id="user-list-popup" title="ユーザ一覧">
         {(() => {
-          if (!join) {
-            return (
-              <div>
-                {roomInfo.pass &&
-                  <FormControl
-                    type="text"
-                    value={pass}
-                    placeholder="合言葉"
-                    onChange={this.handleChangeRoomPass}
-                    />
-                }
-                <Button onClick={this.handleJoinChat}>参加</Button>
-              </div>
-            );
+          if (users.size === 0) {
+            return <span>なし</span>;
           }
 
           return (
-            <div>
-              <FormControl
-                type="text"
-                value={logMessage}
-                placeholder="Enter text"
-                onChange={this.handleChangeLogMessage}
-                />
-              <Button onClick={this.handleSendLogMessage}>送信</Button>
-            </div>
+            <ul>
+              {users.valueSeq().map((user) =>
+                <li key={user.get('id')}>
+                  <img src={user.get('icon_url')} />
+                  {user.get('name')}
+                </li>
+              )}
+            </ul>
           );
         })()}
+      </Popover>
+    );
+  }
+
+  render() {
+    const { logs, users, logMessage, join, roomInfo, pass, color } = this.props;
+
+    return (
+      <div className="chatroom">
+        <DrawCanvas />
+        <div className="tool-box">
+          <PreviewCanvas />
+          <SketchPicker width="auto" color={color} onChange={this.handleChangeColor} />
+          <div className="user-list">
+            <OverlayTrigger placement="left" overlay={this.renderPopoverUserList()}>
+              <span>ユーザ({users.size}人) | 閲覧(hoge人)</span>
+            </OverlayTrigger>
+          </div>
+          <div className="chat-logs">
+            <ul>
+              {logs.map((log) =>
+                <li key={log.get('id')}>
+                  <b>{log.get('userName')}</b>: {log.get('message')}
+                </li>
+              )}
+            </ul>
+          </div>
+          {(() => {
+            if (!join) {
+              return (
+                <div>
+                  <Form inline onSubmit={this.handleJoinChat}>
+                    {roomInfo.pass &&
+                      <FormControl
+                        type="text"
+                        value={pass}
+                        placeholder="合言葉"
+                        onChange={this.handleChangeRoomPass}
+                        />
+                    }
+                    <Button type="submit">参加</Button>
+                  </Form>
+                </div>
+              );
+            }
+
+            return (
+              <div>
+                <Form inline onSubmit={this.handleSendLogMessage}>
+                  <FormControl
+                    type="text"
+                    value={logMessage}
+                    placeholder="Enter text"
+                    onChange={this.handleChangeLogMessage}
+                    />
+                  <Button type="submit">送信</Button>
+                </Form>
+              </div>
+            );
+          })()}
+        </div>
       </div>
+
     );
   }
 }
 
 function select(state, ownProps) {
   const $$chatStore = state.$$chatStore;
+  const $$canvasStore = state.$$canvasStore;
   const { id, pass, hidden } = ownProps;
   const roomInfo = { id, pass, hidden };
 
@@ -105,6 +171,7 @@ function select(state, ownProps) {
     logMessage: $$chatStore.get('logMessage'),
     join: $$chatStore.get('join'),
     pass: $$chatStore.get('pass'),
+    color: $$canvasStore.getIn(['style', 'color']).toJS(),
   };
 }
 

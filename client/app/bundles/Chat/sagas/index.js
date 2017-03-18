@@ -1,7 +1,7 @@
 import { fork } from 'redux-saga/effects';
 
-import handleChat from './chatSagas';
+import handleSocket from './socketSagas';
 
 export default function* rootSaga() {
-  yield fork(handleChat);
+  yield fork(handleSocket);
 }

@@ -1,0 +1,72 @@
+.chatroom
+  position: absolute
+  left: 10px
+  top: 60px
+  right: 10px
+  bottom: 10px
+  display: flex
+
+  .draw-canvas
+    flex: 1
+    cursor: default
+    border: 1px solid black
+    background-color: darkgray
+    overflow: hidden
+    position: relative
+
+    img
+      position: absolute
+      top: 0
+      left: 0
+      transform-origin: left top
+
+  .tool-box
+    width: 250px
+    margin-left: 10px
+    display: flex
+    flex-direction: column
+
+    .canvas-wrapper
+      cursor: default
+      width: 250px
+      height: 250px
+      border: 1px solid black
+      canvas
+        position: absolute
+        width: 250px
+        height: 250px
+
+        &#tempCanvas
+          display: none
+
+    .sketch-picker
+      box-shadow: none!important
+
+    .user-list, .chat-logs
+      border-top: 1px solid rgb(238, 238, 238)
+      padding-top: 5px
+      padding-bottom: 5px
+
+    .chat-logs
+      flex: 1
+      overflow-y: scroll
+      ul
+        margin-bottom: 0px
+        font-size: 12px
+
+#user-list-popup ul
+  margin-bottom: 0px
+  img
+    width: 24px
+    height: 24px
+    margin-right: 5px
+
+
+.form-inline
+  display: flex
+  & > *:first-child
+    flex: 1
+
+ul
+  list-style-type: none
+  padding-left: 0px

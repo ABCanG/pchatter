@@ -1,4 +1,1 @@
-<%= link_to 'Edit', edit_room_path(@room) %> |
-<%= link_to 'Back', rooms_path %>
-
 <%= react_component("ChatApp", props: { id: @room.id, pass: @room.pass.present?, hidden: @room.hidden }, prerender: false) %>

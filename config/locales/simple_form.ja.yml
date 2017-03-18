@@ -12,12 +12,13 @@ ja:
       room:
         name: '部屋名'
         pass: '合言葉'
-        hidden: '入室者だけ絵を見れる'
+        hidden: '閲覧のみを禁止'
     hints:
       defaults:
       room:
         name: '63文字以内'
         pass: '63文字以内'
+        hidden: '入室してない人は絵が見れなくなります'
     placeholders:
       defaults:
     include_blanks:
