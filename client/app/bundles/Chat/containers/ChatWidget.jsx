@@ -10,11 +10,9 @@ import {
   sendLogMessage, setRoomInfo, setRoomPass
 } from '../actions/chatActionCreators';
 import {
-  setStyleColor, setStyleAlpha,
+  setStyleColor,
 } from '../actions/canvasActionCreators';
 import DrawCanvas from './DrawCanvas';
-import PreviewCanvas from './PreviewCanvas';
-
 
 class ChatWidget extends React.Component {
   static propTypes = {
@@ -70,6 +68,10 @@ class ChatWidget extends React.Component {
     dispatch(setStyleColor(color.rgb));
   }
 
+  refPreviewCanvas = (element) => {
+    this.previewCanvas = element;
+  }
+
   renderPopoverUserList() {
     const { users } = this.props;
 
@@ -100,9 +102,9 @@ class ChatWidget extends React.Component {
 
     return (
       <div className="chatroom">
-        <DrawCanvas />
+        <DrawCanvas previewCanvas={this.previewCanvas} />
         <div className="tool-box">
-          <PreviewCanvas />
+          <canvas id="previewCanvas" width={250} height={250} ref={this.refPreviewCanvas} />
           <SketchPicker width="auto" color={color} onChange={this.handleChangeColor} />
           <div className="user-list">
             <OverlayTrigger placement="left" overlay={this.renderPopoverUserList()}>

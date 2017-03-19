@@ -1,10 +1,11 @@
 import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
-import Immutable from 'immutable';
 
 import {
   initTempPath, addTempPath, sendTempPath,
 } from '../actions/canvasActionCreators';
+import MainCanvas from './MainCanvas';
+
 
 function getMousePosition(e) {
   const rect = e.target.getBoundingClientRect();
@@ -17,8 +18,12 @@ function getMousePosition(e) {
 class DrawCanvas extends React.Component {
   static propTypes = {
     join: PropTypes.bool.isRequired,
-    canvas: PropTypes.instanceOf(Immutable.Map).isRequired,
+    previewCanvas: PropTypes.instanceOf(HTMLElement),
     dispatch: PropTypes.func.isRequired,
+  };
+
+  static defaultProps = {
+    previewCanvas: null
   };
 
   constructor(props) {
@@ -67,18 +72,12 @@ class DrawCanvas extends React.Component {
   }
 
   render() {
-    const { canvas } = this.props;
-    const style = {
-      transform: `scale(${canvas.get('scale')}) translate(-${canvas.get('top')}px, -${canvas.get('left')}px)`
-    };
-
     return (
       <div className="draw-canvas"
         onMouseDown={this.handleMouseDown}
         onMouseMove={this.handleMouseMove}
         onMouseUp={this.handleMouseUp}>
-        <img src="/base.png" style={style} />
-        <img src={canvas.get('image')} style={style} />
+        <MainCanvas previewCanvas={this.props.previewCanvas} />
       </div>
     );
   }
@@ -86,11 +85,9 @@ class DrawCanvas extends React.Component {
 
 function select(state, ownProps) {
   const $$chatStore = state.$$chatStore;
-  const $$canvasStore = state.$$canvasStore;
 
   return {
     join: $$chatStore.get('join'),
-    canvas: $$canvasStore.get('canvas'),
   };
 }
 

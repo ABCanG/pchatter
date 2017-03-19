@@ -19,7 +19,6 @@ export const $$initialState = Immutable.fromJS({
     scale: 1,
     top: 0,
     left: 0,
-    image: '/base.png',
   }
 });
 
@@ -28,7 +27,7 @@ export default function canvasReducer($$state = $$initialState, action) {
 
   switch (type) {
     case actionTypes.CLEAR_TEMP_PATH: {
-      return $$state.set('tempPath', Immutable.fromJS([]));
+      return $$state.set('tempPath', Immutable.List());
     }
 
     case actionTypes.INIT_TEMP_PATH: {
@@ -65,10 +64,6 @@ export default function canvasReducer($$state = $$initialState, action) {
 
     case actionTypes.SET_CANVAS_LEFT: {
       return $$state.update('canvas', (canvas) => canvas.set('left', payload.left));
-    }
-
-    case actionTypes.SET_CANVAS_IMAGE: {
-      return $$state.update('canvas', (canvas) => canvas.set('image', payload.image));
     }
 
     default: {

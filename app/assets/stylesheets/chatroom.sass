@@ -14,11 +14,17 @@
     overflow: hidden
     position: relative
 
-    img
-      position: absolute
-      top: 0
-      left: 0
-      transform-origin: left top
+    .canvas-wrapper
+      canvas
+        position: absolute
+        top: 0
+        left: 0
+        transform-origin: left top
+
+        &#tempCanvas
+          display: none
+      .canvas-back
+        background-color: white
 
   .tool-box
     width: 250px
@@ -26,18 +32,9 @@
     display: flex
     flex-direction: column
 
-    .canvas-wrapper
-      cursor: default
-      width: 250px
-      height: 250px
+    #previewCanvas
       border: 1px solid black
-      canvas
-        position: absolute
-        width: 250px
-        height: 250px
 
-        &#tempCanvas
-          display: none
 
     .sketch-picker
       box-shadow: none!important

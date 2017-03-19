@@ -74,10 +74,3 @@ export function setCanvasLeft(left) {
     payload: { left }
   };
 }
-
-export function setCanvasImage(image) {
-  return {
-    type: actionTypes.SET_CANVAS_IMAGE,
-    payload: { image }
-  };
-}
