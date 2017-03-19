@@ -15,6 +15,7 @@
     position: relative
 
     .canvas-wrapper
+      position: absolute
       canvas
         position: absolute
         top: 0
@@ -26,23 +27,41 @@
       .canvas-back
         background-color: white
 
+    #mouseCircleCanvas
+      position: absolute
+
   .tool-box
-    width: 250px
+    width: 220px
     margin-left: 10px
     display: flex
     flex-direction: column
 
     #previewCanvas
       border: 1px solid black
+      margin: 0 10px
 
 
     .sketch-picker
       box-shadow: none!important
 
+    .slider
+      margin-bottom: 10px
+      input
+        width: 50px
+        font-size: 12px
+        vertical-align: middle
+        margin-left: 10px
+      .rc-slider
+        display: inline-block
+        vertical-align: middle
+        width: 140px
+        margin: 0px 10px
+
     .user-list, .chat-logs
       border-top: 1px solid rgb(238, 238, 238)
       padding-top: 5px
       padding-bottom: 5px
+      padding-left: 10px
 
     .chat-logs
       flex: 1
