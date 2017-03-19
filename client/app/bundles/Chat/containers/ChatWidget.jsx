@@ -9,10 +9,9 @@ import {
   requestConnectChat, requestJoinChat, setLogMessage,
   sendLogMessage, setRoomInfo, setRoomPass
 } from '../actions/chatActionCreators';
-import {
-  setStyleColor,
-} from '../actions/canvasActionCreators';
+import { setStyleColor } from '../actions/canvasActionCreators';
 import DrawCanvas from './DrawCanvas';
+import WidthSlider from './WidthSlider';
 
 class ChatWidget extends React.Component {
   static propTypes = {
@@ -104,8 +103,9 @@ class ChatWidget extends React.Component {
       <div className="chatroom">
         <DrawCanvas previewCanvas={this.previewCanvas} />
         <div className="tool-box">
-          <canvas id="previewCanvas" width={250} height={250} ref={this.refPreviewCanvas} />
-          <SketchPicker width="auto" color={color} onChange={this.handleChangeColor} />
+          <canvas id="previewCanvas" width={200} height={200} ref={this.refPreviewCanvas} />
+          <SketchPicker width="200px" color={color} onChange={this.handleChangeColor} />
+          <WidthSlider />
           <div className="user-list">
             <OverlayTrigger placement="left" overlay={this.renderPopoverUserList()}>
               <span>ユーザ({users.size}人) | 閲覧(hoge人)</span>

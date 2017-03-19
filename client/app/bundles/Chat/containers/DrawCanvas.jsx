@@ -1,5 +1,6 @@
 import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
+import Immutable from 'immutable';
 
 import {
   initTempPath, addTempPath, sendTempPath,
@@ -19,6 +20,8 @@ class DrawCanvas extends React.Component {
   static propTypes = {
     join: PropTypes.bool.isRequired,
     previewCanvas: PropTypes.instanceOf(HTMLElement),
+    style: PropTypes.instanceOf(Immutable.Map).isRequired,
+    canvas: PropTypes.instanceOf(Immutable.Map).isRequired,
     dispatch: PropTypes.func.isRequired,
   };
 
@@ -31,6 +34,26 @@ class DrawCanvas extends React.Component {
     this.isMouseDown = false;
   }
 
+  componentDidMount() {
+    window.addEventListener('resize', this.handleResizeEvent);
+    this.resizeCanvas();
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.handleResizeEvent);
+  }
+
+  resizeCanvas() {
+    if (this.mouseCircleCtx) {
+      const canvas = this.mouseCircleCtx.canvas;
+      canvas.width = canvas.parentElement.offsetWidth;
+      canvas.height = canvas.parentElement.offsetHeight;
+    }
+  }
+
+  handleResizeEvent = () => {
+    this.resizeCanvas();
+  }
 
   handleMouseDown = (e) => {
     const { dispatch, join } = this.props;
@@ -54,12 +77,15 @@ class DrawCanvas extends React.Component {
       return;
     }
 
+    const pos = getMousePosition(e);
+    this.drawMousePosition(pos);
+
     if (this.isMouseDown) {
-      dispatch(addTempPath(getMousePosition(e)));
+      dispatch(addTempPath(pos));
     }
   }
 
-  handleMouseUp = (e) => {
+  handleMouseUp = () => {
     const { dispatch, join } = this.props;
     if (!join) {
       return;
@@ -71,13 +97,50 @@ class DrawCanvas extends React.Component {
     }
   }
 
+  handleMouseOut = () => {
+    this.clearMousePositionCanvas();
+  }
+
+  clearMousePositionCanvas() {
+    const ctx = this.mouseCircleCtx;
+    if (ctx) {
+      const canvas = ctx.canvas;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  }
+
+  drawMousePosition(pos) {
+    const ctx = this.mouseCircleCtx;
+    if (!ctx) {
+      return;
+    }
+
+    const { style, canvas } = this.props;
+    const { x, y } = pos;
+    this.clearMousePositionCanvas();
+    ctx.strokeStyle = '#808080';
+    ctx.beginPath();
+    ctx.arc(x, y, (style.get('width') * canvas.get('scale')) / 2, 0, Math.PI * 2, false);
+    ctx.stroke();
+  }
+
+  refCanvasCtx = (element) => {
+    if (element) {
+      this.mouseCircleCtx = element.getContext('2d');
+    } else {
+      this.mouseCircleCtx = null;
+    }
+  }
+
   render() {
     return (
       <div className="draw-canvas"
         onMouseDown={this.handleMouseDown}
         onMouseMove={this.handleMouseMove}
-        onMouseUp={this.handleMouseUp}>
+        onMouseUp={this.handleMouseUp}
+        onMouseOut={this.handleMouseOut}>
         <MainCanvas previewCanvas={this.props.previewCanvas} />
+        <canvas id="mouseCircleCanvas" ref={this.refCanvasCtx} />
       </div>
     );
   }
@@ -85,9 +148,12 @@ class DrawCanvas extends React.Component {
 
 function select(state, ownProps) {
   const $$chatStore = state.$$chatStore;
+  const $$canvasStore = state.$$canvasStore;
 
   return {
     join: $$chatStore.get('join'),
+    style: $$canvasStore.get('style'),
+    canvas: $$canvasStore.get('canvas'),
   };
 }
 

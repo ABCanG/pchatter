@@ -12,7 +12,7 @@ export const $$initialState = Immutable.fromJS({
       b: 27,
       a: 1,
     },
-    width: 20,
+    width: 5,
     type: 'source-over',
   },
   canvas: {
