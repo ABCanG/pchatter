@@ -31,6 +31,9 @@ module.exports = {
         'ImportDeclaration': true
       }
     }],
+    'no-param-reassign': [2, {
+      'props': false
+    }],
 
     // Strict Mode
     'strict': [1, 'safe'],

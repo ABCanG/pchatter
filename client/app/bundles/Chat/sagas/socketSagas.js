@@ -117,14 +117,13 @@ function* handleSendLogMessage(socket) {
 
 function* handleSendPath(socket) {
   while (true) {
-    yield take(canvasActionTypes.SEND_TEMP_PATH);
-    const path = yield select((state) => ({
-      data: state.$$canvasStore.get('tempPath').toJS(),
-      style: state.$$canvasStore.get('style').toJS(),
-    }));
+    const { payload: { tempPath } } = yield take(canvasActionTypes.SEND_TEMP_PATH);
+    const path = {
+      data: tempPath,
+      style: yield select((state) => state.$$canvasStore.get('style').toJS()),
+    };
 
     socket.emit('path', { path });
-    yield put(clearTempPath());
   }
 }
 

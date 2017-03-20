@@ -26,18 +26,6 @@ export default function canvasReducer($$state = $$initialState, action) {
   const { type, payload } = action;
 
   switch (type) {
-    case actionTypes.CLEAR_TEMP_PATH: {
-      return $$state.set('tempPath', Immutable.List());
-    }
-
-    case actionTypes.INIT_TEMP_PATH: {
-      return $$state.set('tempPath', Immutable.fromJS([payload.path]));
-    }
-
-    case actionTypes.ADD_TEMP_PATH: {
-      return $$state.update('tempPath', (tempPath) => tempPath.push(Immutable.fromJS(payload.path)));
-    }
-
     case actionTypes.ADD_PATH_TO_CANVAS: {
       return $$state.update('paths', (paths) => paths.merge(Immutable.fromJS(payload.paths)).sortBy((path) => path.get('id')));
     }

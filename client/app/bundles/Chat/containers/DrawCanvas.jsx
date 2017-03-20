@@ -1,6 +1,7 @@
 import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
 import Immutable from 'immutable';
+import EventListener from 'react-event-listener';
 
 import {
   initTempPath, addTempPath, sendTempPath,
@@ -32,15 +33,11 @@ class DrawCanvas extends React.Component {
   constructor(props) {
     super(props);
     this.isMouseDown = false;
+    this.tempPath = [];
   }
 
   componentDidMount() {
-    window.addEventListener('resize', this.handleResizeEvent);
     this.resizeCanvas();
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener('resize', this.handleResizeEvent);
   }
 
   resizeCanvas() {
@@ -51,7 +48,7 @@ class DrawCanvas extends React.Component {
     }
   }
 
-  handleResizeEvent = () => {
+  handleResize = () => {
     this.resizeCanvas();
   }
 
@@ -64,7 +61,8 @@ class DrawCanvas extends React.Component {
     // e.button 0: 左 1: 中 2: 右
     if (!this.isMouseDown) {
       this.isMouseDown = true;
-      dispatch(initTempPath(getMousePosition(e)));
+      this.tempPath = [getMousePosition(e)];
+      this.drawTempPath(this.tempPath);
     }
   }
 
@@ -81,7 +79,8 @@ class DrawCanvas extends React.Component {
     this.drawMousePosition(pos);
 
     if (this.isMouseDown) {
-      dispatch(addTempPath(pos));
+      this.tempPath.push(pos);
+      this.drawTempPath(this.tempPath);
     }
   }
 
@@ -93,7 +92,9 @@ class DrawCanvas extends React.Component {
 
     if (this.isMouseDown) {
       this.isMouseDown = false;
-      dispatch(sendTempPath());
+      dispatch(sendTempPath(this.tempPath));
+      this.tempPath = [];
+      this.drawTempPath(this.tempPath);
     }
   }
 
@@ -132,14 +133,32 @@ class DrawCanvas extends React.Component {
     }
   }
 
+  refMouseHandleElement = (element) => {
+    this.mouseHandleElement = element;
+  }
+
+  refDrawTempPath = (component) => {
+    console.log(component);
+    const drawTempPath = component.getWrappedInstance().drawTempPath;
+    this.drawTempPath = (tempPath) => requestAnimationFrame(() => {
+      drawTempPath(tempPath);
+    });
+  }
+
   render() {
     return (
       <div className="draw-canvas"
-        onMouseDown={this.handleMouseDown}
-        onMouseMove={this.handleMouseMove}
-        onMouseUp={this.handleMouseUp}
-        onMouseOut={this.handleMouseOut}>
-        <MainCanvas previewCanvas={this.props.previewCanvas} />
+        ref={this.refMouseHandleElement}>
+        <EventListener
+          target="window"
+          onResize={this.handleResize} />
+        {this.mouseHandleElement && <EventListener
+          target={this.mouseHandleElement}
+          onMouseDown={this.handleMouseDown}
+          onMouseMove={this.handleMouseMove}
+          onMouseUp={this.handleMouseUp}
+          onMouseOut={this.handleMouseOut} />}
+        <MainCanvas previewCanvas={this.props.previewCanvas} ref={this.refDrawTempPath} />
         <canvas id="mouseCircleCanvas" ref={this.refCanvasCtx} />
       </div>
     );

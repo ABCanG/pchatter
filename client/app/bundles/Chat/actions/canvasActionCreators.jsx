@@ -1,28 +1,9 @@
 import actionTypes from '../constants/canvasConstants';
 
-export function clearTempPath() {
+export function sendTempPath(tempPath) {
   return {
-    type: actionTypes.CLEAR_TEMP_PATH
-  };
-}
-
-export function initTempPath(path) {
-  return {
-    type: actionTypes.INIT_TEMP_PATH,
-    payload: { path }
-  };
-}
-
-export function addTempPath(path) {
-  return {
-    type: actionTypes.ADD_TEMP_PATH,
-    payload: { path }
-  };
-}
-
-export function sendTempPath() {
-  return {
-    type: actionTypes.SEND_TEMP_PATH
+    type: actionTypes.SEND_TEMP_PATH,
+    payload: { tempPath },
   };
 }
 
