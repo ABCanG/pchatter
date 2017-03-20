@@ -6,14 +6,41 @@ function cssColor(c) {
   return `rgb(${c.r},${c.g},${c.b})`;
 }
 
+function setCtxStyle(ctx, style) {
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = cssColor(style.color);
+  ctx.lineWidth = style.width;
+  ctx.globalAlpha = style.color.a;
+  ctx.globalCompositeOperation = style.type;
+}
+
+// パスを描画
+function drawPathData(ctx, pathData) {
+  const [firstPoint, ...restPoint] = pathData;
+
+  // 画面クリア
+  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+  // 線を引く
+  ctx.beginPath();
+  ctx.moveTo(firstPoint.x, firstPoint.y);
+  for (const point of restPoint) {
+    ctx.lineTo(point.x, point.y);
+  }
+  ctx.stroke();
+}
+
 class MainCanvas extends React.Component {
   static propTypes = {
+    visibleTempPath: PropTypes.bool.isRequired,
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
     paths: PropTypes.instanceOf(Immutable.Set).isRequired,
     style: PropTypes.instanceOf(Immutable.Map).isRequired,
     canvas: PropTypes.instanceOf(Immutable.Map).isRequired,
     previewCanvas: PropTypes.instanceOf(HTMLElement),
+    setDrawTempPathMethod: PropTypes.func.isRequired,
   };
 
   static defaultProps = {
@@ -23,12 +50,17 @@ class MainCanvas extends React.Component {
   };
 
   componentDidMount() {
+    this.props.setDrawTempPathMethod(this.drawTempPath);
     requestAnimationFrame(this.redraw);
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    const { width, height, paths } = this.props;
-    if (width !== nextProps.width || height !== nextProps.height) {
+    const { visibleTempPath, width, height, canvas, paths } = this.props;
+    if (width !== nextProps.width ||
+      height !== nextProps.height ||
+      visibleTempPath !== nextProps.visibleTempPath ||
+      !Immutable.is(canvas, nextProps.canvas)
+    ) {
       return true;
     }
 
@@ -54,49 +86,14 @@ class MainCanvas extends React.Component {
     return false;
   }
 
-  componentDidUpdate() {
-    requestAnimationFrame(this.redraw);
-  }
-
-  // tempのスタイルの設定
-  setCtxStyle(ctx, style) {
-    if (!this.isDrawable()) {
-      return;
-    }
-
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.strokeStyle = cssColor(style.color);
-    ctx.lineWidth = style.width;
-    ctx.globalAlpha = style.color.a;
-    ctx.globalCompositeOperation = style.type;
-  }
-
-  // パスを描画
-  drawPathData(ctx, pathData) {
-    if (!this.isDrawable()) {
-      return;
-    }
-
-    const { width, height } = this.props;
-    const [firstPoint, ...restPoint] = pathData;
-
-    // 画面クリア
-    ctx.clearRect(0, 0, width, height);
-
-    // 線を引く
-    ctx.beginPath();
-    ctx.moveTo(firstPoint.x, firstPoint.y);
-    for (const point of restPoint) {
-      ctx.lineTo(point.x, point.y);
-    }
-    ctx.stroke();
-  }
-
   drawPaths(paths) {
+    if (!this.isDrawable()) {
+      return;
+    }
+
     for (const path of paths) {
-      this.setCtxStyle(this.tempCtx, path.get('style').toJS());
-      this.drawPathData(this.tempCtx, path.get('data').toJS());
+      setCtxStyle(this.tempCtx, path.get('style').toJS());
+      drawPathData(this.tempCtx, path.get('data').toJS());
       // 出力先のキャンバスに反映
       this.mainCtx.drawImage(this.tempCtx.canvas, 0, 0);
     }
@@ -111,8 +108,8 @@ class MainCanvas extends React.Component {
     const { width, height, style } = this.props;
 
     if (tempPath.length > 0) {
-      this.setCtxStyle(this.myCtx, style.toJS());
-      this.drawPathData(this.myCtx, tempPath);
+      setCtxStyle(this.myCtx, style.toJS());
+      drawPathData(this.myCtx, tempPath);
       this.reflectOnPreviewCanvas();
     } else {
       this.myCtx.clearRect(0, 0, width, height);
@@ -161,19 +158,22 @@ class MainCanvas extends React.Component {
   }
 
   render() {
-    const { width, height, canvas } = this.props;
+    const { visibleTempPath, width, height, canvas } = this.props;
     const style = {
       width,
       height,
       transform: `scale(${canvas.get('scale')}) translate(-${canvas.get('top')}px, -${canvas.get('left')}px)`
     };
+    const myCanvasStyle = Object.assign({
+      display: visibleTempPath ? 'block' : 'none'
+    }, style);
 
     return (
       <div className="canvas-wrapper">
         <div className="canvas-back" style={style} />
         <canvas id="tempCanvas" width={width} height={height} ref={this.refCanvasCtx('temp')} />
         <canvas id="mainCanvas" width={width} height={height} ref={this.refCanvasCtx('main')} style={style} />
-        <canvas id="myCanvas" width={width} height={height} ref={this.refCanvasCtx('my')} style={style} />
+        <canvas id="myCanvas" width={width} height={height} ref={this.refCanvasCtx('my')} style={myCanvasStyle} />
       </div>
     );
   }
@@ -183,10 +183,11 @@ function select(state, ownProps) {
   const $$canvasStore = state.$$canvasStore;
 
   return {
+    visibleTempPath: $$canvasStore.get('visibleTempPath'),
     style: $$canvasStore.get('style'),
     paths: $$canvasStore.get('paths'),
     canvas: $$canvasStore.get('canvas'),
   };
 }
 
-export default connect(select, null, null, { withRef: true })(MainCanvas);
+export default connect(select)(MainCanvas);

@@ -9,7 +9,7 @@ import {
   requestJoinChat, successJoinChat, failureJoinChat,
   addChatLog, setUserList, setLogMessage
 } from '../actions/chatActionCreators';
-import { clearTempPath, addPathToCanvas } from '../actions/canvasActionCreators';
+import { setVisibleTempPath, addPathToCanvas } from '../actions/canvasActionCreators';
 
 const socketIoURL = process.env.NODE_ENV === 'production' ? '' : 'http://localhost:4000';
 
@@ -77,6 +77,11 @@ function* handleSocketEvent(socket) {
       case 'path': {
         const { path } = data;
         yield put(addPathToCanvas([path]));
+        const currentUserId = yield select((state) => state.$$chatStore.get('currentUserId'));
+        console.log('check', currentUserId, path.userId);
+        if (path.userId === currentUserId) {
+          yield put(setVisibleTempPath(false));
+        }
         break;
       }
 

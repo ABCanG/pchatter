@@ -4,6 +4,7 @@ import actionTypes from '../constants/chatConstants';
 
 export const $$initialState = Immutable.fromJS({
   info: {},
+  currentUserId: null,
   connect: false,
   join: false,
   joinFailureMessage: '',
@@ -23,6 +24,10 @@ export default function chatReducer($$state = $$initialState, action) {
 
     case actionTypes.SET_ROOM_PASS: {
       return $$state.set('pass', payload.pass);
+    }
+
+    case actionTypes.SET_CURRENT_USER_ID: {
+      return $$state.set('currentUserId', payload.currentUserId);
     }
 
     case actionTypes.SUCCESS_CONNECT_CHAT: {

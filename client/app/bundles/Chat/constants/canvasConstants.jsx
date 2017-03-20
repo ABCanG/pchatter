@@ -1,9 +1,7 @@
 import mirrorCreator from 'mirror-creator';
 
 const actionTypes = mirrorCreator([
-  'CLEAR_TEMP_PATH',
-  'INIT_TEMP_PATH',
-  'ADD_TEMP_PATH',
+  'SET_VISIBLE_TEMP_PATH',
   'SEND_TEMP_PATH',
   'ADD_PATH_TO_CANVAS',
   'SET_STYLE_COLOR',

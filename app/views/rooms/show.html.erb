@@ -1,1 +1,6 @@
-<%= react_component("ChatApp", props: { id: @room.id, pass: @room.pass.present?, hidden: @room.hidden }, prerender: false) %>
+<%= react_component("ChatApp", props: {
+	id: @room.id,
+	pass: @room.pass.present?,
+	hidden: @room.hidden,
+	currentUserId: current_user&.id
+}, prerender: false) %>

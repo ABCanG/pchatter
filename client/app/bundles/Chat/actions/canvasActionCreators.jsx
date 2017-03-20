@@ -7,6 +7,13 @@ export function sendTempPath(tempPath) {
   };
 }
 
+export function setVisibleTempPath(flag) {
+  return {
+    type: actionTypes.SET_VISIBLE_TEMP_PATH,
+    payload: { flag },
+  };
+}
+
 export function addPathToCanvas(paths) {
   return {
     type: actionTypes.ADD_PATH_TO_CANVAS,

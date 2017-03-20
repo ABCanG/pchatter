@@ -13,6 +13,7 @@ const actionTypes = mirrorCreator([
   'SET_USER_LIST',
   'SET_ROOM_INFO',
   'SET_ROOM_PASS',
+  'SET_CURRENT_USER_ID',
 
   'SET_LOG_MESSAGE',
   'SEND_LOG_MESSAGE',

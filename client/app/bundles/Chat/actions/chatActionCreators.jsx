@@ -54,6 +54,13 @@ export function setRoomInfo(room) {
   };
 }
 
+export function setCurrentUserId(currentUserId) {
+  return {
+    type: actionTypes.SET_CURRENT_USER_ID,
+    payload: { currentUserId }
+  };
+}
+
 export function setUserList(users) {
   return {
     type: actionTypes.SET_USER_LIST,

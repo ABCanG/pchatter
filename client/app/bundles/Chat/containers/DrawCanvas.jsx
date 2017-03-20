@@ -3,11 +3,8 @@ import { connect } from 'react-redux';
 import Immutable from 'immutable';
 import EventListener from 'react-event-listener';
 
-import {
-  initTempPath, addTempPath, sendTempPath,
-} from '../actions/canvasActionCreators';
+import { setVisibleTempPath, sendTempPath } from '../actions/canvasActionCreators';
 import MainCanvas from './MainCanvas';
-
 
 function getMousePosition(e) {
   const rect = e.target.getBoundingClientRect();
@@ -63,6 +60,7 @@ class DrawCanvas extends React.Component {
       this.isMouseDown = true;
       this.tempPath = [getMousePosition(e)];
       this.drawTempPath(this.tempPath);
+      dispatch(setVisibleTempPath(true));
     }
   }
 
@@ -70,7 +68,7 @@ class DrawCanvas extends React.Component {
     window.getSelection().removeAllRanges();
     e.preventDefault();
 
-    const { dispatch, join } = this.props;
+    const { join } = this.props;
     if (!join) {
       return;
     }
@@ -93,8 +91,6 @@ class DrawCanvas extends React.Component {
     if (this.isMouseDown) {
       this.isMouseDown = false;
       dispatch(sendTempPath(this.tempPath));
-      this.tempPath = [];
-      this.drawTempPath(this.tempPath);
     }
   }
 
@@ -137,9 +133,7 @@ class DrawCanvas extends React.Component {
     this.mouseHandleElement = element;
   }
 
-  refDrawTempPath = (component) => {
-    console.log(component);
-    const drawTempPath = component.getWrappedInstance().drawTempPath;
+  handleSetDrawTempPathMethod = (drawTempPath) => {
     this.drawTempPath = (tempPath) => requestAnimationFrame(() => {
       drawTempPath(tempPath);
     });
@@ -158,7 +152,8 @@ class DrawCanvas extends React.Component {
           onMouseMove={this.handleMouseMove}
           onMouseUp={this.handleMouseUp}
           onMouseOut={this.handleMouseOut} />}
-        <MainCanvas previewCanvas={this.props.previewCanvas} ref={this.refDrawTempPath} />
+        <MainCanvas previewCanvas={this.props.previewCanvas}
+          setDrawTempPathMethod={this.handleSetDrawTempPathMethod} />
         <canvas id="mouseCircleCanvas" ref={this.refCanvasCtx} />
       </div>
     );

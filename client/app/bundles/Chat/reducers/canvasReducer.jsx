@@ -3,7 +3,7 @@ import Immutable from 'immutable';
 import actionTypes from '../constants/canvasConstants';
 
 export const $$initialState = Immutable.fromJS({
-  tempPath: [],
+  visibleTempPath: false,
   paths: Immutable.Set(),
   style: {
     color: {
@@ -26,6 +26,10 @@ export default function canvasReducer($$state = $$initialState, action) {
   const { type, payload } = action;
 
   switch (type) {
+    case actionTypes.SET_VISIBLE_TEMP_PATH: {
+      return $$state.set('visibleTempPath', payload.flag);
+    }
+
     case actionTypes.ADD_PATH_TO_CANVAS: {
       return $$state.update('paths', (paths) => paths.merge(Immutable.fromJS(payload.paths)).sortBy((path) => path.get('id')));
     }

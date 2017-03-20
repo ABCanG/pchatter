@@ -7,7 +7,7 @@ import { SketchPicker } from 'react-color';
 
 import {
   requestConnectChat, requestJoinChat, setLogMessage,
-  sendLogMessage, setRoomInfo, setRoomPass
+  sendLogMessage, setRoomInfo, setRoomPass, setCurrentUserId
 } from '../actions/chatActionCreators';
 import { setStyleColor } from '../actions/canvasActionCreators';
 import DrawCanvas from './DrawCanvas';
@@ -20,6 +20,7 @@ class ChatWidget extends React.Component {
       pass: PropTypes.bool.isRequired,
       hidden: PropTypes.bool.isRequired,
     }).isRequired,
+    currentUserId: PropTypes.number,
     join: PropTypes.bool.isRequired,
     logs: PropTypes.instanceOf(Immutable.Set).isRequired,
     users: PropTypes.instanceOf(Immutable.Map).isRequired,
@@ -34,10 +35,15 @@ class ChatWidget extends React.Component {
     dispatch: PropTypes.func.isRequired,
   };
 
+  static defaultProps = {
+    currentUserId: null
+  };
+
   componentDidMount() {
-    const { dispatch, roomInfo } = this.props;
+    const { dispatch, roomInfo, currentUserId } = this.props;
     dispatch(setRoomInfo(roomInfo));
     dispatch(requestConnectChat(roomInfo.id));
+    dispatch(setCurrentUserId(currentUserId));
   }
 
   handleChangeLogMessage = (e) => {
@@ -163,11 +169,11 @@ class ChatWidget extends React.Component {
 function select(state, ownProps) {
   const $$chatStore = state.$$chatStore;
   const $$canvasStore = state.$$canvasStore;
-  const { id, pass, hidden } = ownProps;
-  const roomInfo = { id, pass, hidden };
+  const { currentUserId, id, pass, hidden } = ownProps;
 
   return {
-    roomInfo,
+    currentUserId,
+    roomInfo: { id, pass, hidden },
     logs: $$chatStore.get('logs'),
     users: $$chatStore.get('users'),
     logMessage: $$chatStore.get('logMessage'),
