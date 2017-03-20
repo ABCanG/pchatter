@@ -133,7 +133,7 @@ class MainCanvas extends React.Component {
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, previewWidth, previewHeight);
     ctx.drawImage(this.mainCtx.canvas, 0, 0, width, height, 0, 0, previewWidth, previewHeight);
-    ctx.drawImage(this.tempCtx.canvas, 0, 0, width, height, 0, 0, previewWidth, previewHeight);
+    ctx.drawImage(this.myCtx.canvas, 0, 0, width, height, 0, 0, previewWidth, previewHeight);
   }
 
   redraw = () => {
