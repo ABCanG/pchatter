@@ -122,7 +122,7 @@ class MainCanvas extends React.Component {
 
   // 画像にしてpreviewCanvasに反映
   reflectOnPreviewCanvas() {
-    const { width, height, previewCanvas } = this.props;
+    const { width, height, previewCanvas, visibleTempPath } = this.props;
     if (!previewCanvas || !this.isDrawable()) {
       return;
     }
@@ -133,7 +133,9 @@ class MainCanvas extends React.Component {
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, previewWidth, previewHeight);
     ctx.drawImage(this.mainCtx.canvas, 0, 0, width, height, 0, 0, previewWidth, previewHeight);
-    ctx.drawImage(this.myCtx.canvas, 0, 0, width, height, 0, 0, previewWidth, previewHeight);
+    if (visibleTempPath) {
+      ctx.drawImage(this.myCtx.canvas, 0, 0, width, height, 0, 0, previewWidth, previewHeight);
+    }
   }
 
   redraw = () => {
