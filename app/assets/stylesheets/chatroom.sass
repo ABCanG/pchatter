@@ -30,9 +30,19 @@
     display: flex
     flex-direction: column
 
-    #previewCanvas
+    .preview
       border: 1px solid black
       margin: 0 10px
+      position: relative
+      width: 200px
+      height: 200px
+      overflow: hidden
+
+      canvas, .preview-frame
+        position: absolute
+
+      .preview-frame
+        border: solid 2px red
 
     .tool-buttons
       margin: 10px

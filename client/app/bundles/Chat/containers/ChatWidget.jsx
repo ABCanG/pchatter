@@ -1,13 +1,18 @@
 import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
+import Immutable from 'immutable';
 import { SketchPicker } from 'react-color';
 
 import { requestConnectChat, setRoomInfo, setCurrentUserId } from '../actions/chatActionCreators';
 import { setStyleColor } from '../actions/canvasActionCreators';
 import DrawCanvas from './DrawCanvas';
+import PreviewCanvas from './PreviewCanvas';
 import WidthSlider from './WidthSlider';
 import ToolButtons from './ToolButtons';
-import ChatBox from './ChatBox';
+import UserList from '../components/UserList';
+import ChatLogs from '../components/ChatLogs';
+import SubmitLogForm from './SubmitLogForm';
+import JoinChatForm from './JoinChatForm';
 
 class ChatWidget extends React.Component {
   static propTypes = {
@@ -23,6 +28,9 @@ class ChatWidget extends React.Component {
       b: PropTypes.number.isRequired,
       a: PropTypes.number.isRequired,
     }).isRequired,
+    users: PropTypes.instanceOf(Immutable.Map).isRequired,
+    logs: PropTypes.instanceOf(Immutable.Set).isRequired,
+    join: PropTypes.bool.isRequired,
     dispatch: PropTypes.func.isRequired,
   };
 
@@ -46,18 +54,22 @@ class ChatWidget extends React.Component {
     this.previewCanvas = element;
   }
 
+  // TODO: hideオプション時の処理
+  // TODO: 参加前にはいろいろなボタンを隠す
   render() {
-    const { color } = this.props;
+    const { color, users, logs, join } = this.props;
 
     return (
       <div className="chatroom">
         <DrawCanvas previewCanvas={this.previewCanvas} />
         <div className="tool-box">
-          <canvas id="previewCanvas" width={200} height={200} ref={this.refPreviewCanvas} />
+          <PreviewCanvas refPreviewCanvas={this.refPreviewCanvas} />
           <ToolButtons />
           <SketchPicker width="200px" color={color} onChange={this.handleChangeColor} />
           <WidthSlider />
-          <ChatBox />
+          <UserList users={users} />
+          <ChatLogs logs={logs} />
+          {join ? <SubmitLogForm /> : <JoinChatForm />}
         </div>
       </div>
     );
@@ -65,12 +77,16 @@ class ChatWidget extends React.Component {
 }
 
 function select(state, ownProps) {
+  const $$chatStore = state.$$chatStore;
   const $$canvasStore = state.$$canvasStore;
   const { currentUserId, id, pass, hidden } = ownProps;
 
   return {
     currentUserId,
     roomInfo: { id, pass, hidden },
+    users: $$chatStore.get('users'),
+    logs: $$chatStore.get('logs'),
+    join: $$chatStore.get('join'),
     color: $$canvasStore.getIn(['style', 'color']).toJS(),
   };
 }

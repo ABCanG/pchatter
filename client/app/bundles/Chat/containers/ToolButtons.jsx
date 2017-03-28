@@ -1,14 +1,24 @@
 import React, { PropTypes } from 'react';
 import { Button } from 'react-bootstrap';
 import { connect } from 'react-redux';
-
+import Immutable from 'immutable';
 
 import { setStyleType, setCanvasInfo } from '../actions/canvasActionCreators';
+
+function convertNewCanvasInfo(canvasInfo, diff) {
+  const { scale, left, top, width, height } = canvasInfo;
+  const newScale = scale + diff;
+  return {
+    scale: newScale,
+    left: left + (((width / scale) - (width / newScale)) / 2),
+    top: top + (((height / scale) - (height / newScale)) / 2),
+  };
+}
 
 class ChatWidget extends React.Component {
   static propTypes = {
     type: PropTypes.string.isRequired,
-    scale: PropTypes.number.isRequired,
+    canvas: PropTypes.instanceOf(Immutable.Map).isRequired,
     dispatch: PropTypes.func.isRequired,
   };
 
@@ -28,13 +38,13 @@ class ChatWidget extends React.Component {
   }
 
   handleClickZoomIn = () => {
-    const { dispatch, scale } = this.props;
-    dispatch(setCanvasInfo({ scale: scale + 0.05 }));
+    const { dispatch, canvas } = this.props;
+    dispatch(setCanvasInfo(convertNewCanvasInfo(canvas.toJS(), 0.05)));
   }
 
   handleClickZoomOut = () => {
-    const { dispatch, scale } = this.props;
-    dispatch(setCanvasInfo({ scale: scale - 0.05 }));
+    const { dispatch, canvas } = this.props;
+    dispatch(setCanvasInfo(convertNewCanvasInfo(canvas.toJS(), -0.05)));
   }
 
   render() {
@@ -67,7 +77,7 @@ function select(state) {
 
   return {
     type: $$canvasStore.getIn(['style', 'type']),
-    scale: $$canvasStore.getIn(['canvas', 'scale']),
+    canvas: $$canvasStore.get('canvas'),
   };
 }
 

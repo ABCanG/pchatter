@@ -5,22 +5,7 @@ import EventListener from 'react-event-listener';
 
 import { setVisibleTempPath, sendTempPath, setCanvasInfo } from '../actions/canvasActionCreators';
 import ShadowCanvas from './ShadowCanvas';
-
-function getMousePosition(e, scale) {
-  const rect = e.target.getBoundingClientRect();
-  const original = {
-    x: (e.clientX - rect.left) - 1,
-    y: (e.clientY - rect.top) - 1,
-  };
-
-  return {
-    original,
-    transformed: {
-      x: original.x / scale,
-      y: original.y / scale,
-    }
-  };
-}
+import { getMousePosition } from '../utils';
 
 class DrawCanvas extends React.Component {
   static propTypes = {
@@ -80,8 +65,8 @@ class DrawCanvas extends React.Component {
     // e.button 0: 左 1: 中 2: 右
     if (!this.isMouseDown) {
       this.isMouseDown = true;
-      const scale = canvas.get('scale');
-      this.tempPath = [getMousePosition(e, scale).transformed];
+      const { scale, left, top } = canvas.toJS();
+      this.tempPath = [getMousePosition(e, { scale, left, top }).transformed];
       this.drawTempPath(this.tempPath);
       dispatch(setVisibleTempPath(true));
     }
@@ -96,8 +81,8 @@ class DrawCanvas extends React.Component {
       return;
     }
 
-    const scale = canvas.get('scale');
-    const pos = getMousePosition(e, scale);
+    const { scale, left, top } = canvas.toJS();
+    const pos = getMousePosition(e, { scale, left, top });
     this.drawMousePosition(pos.original);
 
     if (this.isMouseDown) {
@@ -119,6 +104,7 @@ class DrawCanvas extends React.Component {
   }
 
   handleMouseOut = () => {
+    this.isMouseDown = false;
     this.clearMousePositionCanvas();
   }
 
@@ -171,7 +157,7 @@ class DrawCanvas extends React.Component {
       width,
       height,
       transformOrigin: 'left top',
-      transform: `scale(${canvas.get('scale')}) translate(-${canvas.get('top')}px, -${canvas.get('left')}px)`
+      transform: `scale(${canvas.get('scale')}) translate(${-canvas.get('left')}px, ${-canvas.get('top')}px)`
     };
 
     return (
