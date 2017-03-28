@@ -13,12 +13,14 @@ export const $$initialState = Immutable.fromJS({
       a: 1,
     },
     width: 5,
-    type: 'source-over',
+    type: 'pencil',
   },
   canvas: {
-    scale: 1,
+    scale: 0.5,
     top: 0,
     left: 0,
+    width: 0,
+    height: 0,
   }
 });
 
@@ -46,16 +48,8 @@ export default function canvasReducer($$state = $$initialState, action) {
       return $$state.update('style', (style) => style.set('type', payload.type));
     }
 
-    case actionTypes.SET_CANVAS_SCALE: {
-      return $$state.update('canvas', (canvas) => canvas.set('scale', payload.scale));
-    }
-
-    case actionTypes.SET_CANVAS_TOP: {
-      return $$state.update('canvas', (canvas) => canvas.set('top', payload.top));
-    }
-
-    case actionTypes.SET_CANVAS_LEFT: {
-      return $$state.update('canvas', (canvas) => canvas.set('left', payload.left));
+    case actionTypes.SET_CANVAS_INFO: {
+      return $$state.update('canvas', (canvas) => canvas.merge(Immutable.fromJS(payload.canvas)));
     }
 
     default: {

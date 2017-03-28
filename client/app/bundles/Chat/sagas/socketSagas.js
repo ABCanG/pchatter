@@ -34,7 +34,8 @@ function* handleSocketEvent(socket) {
     'users',
     'disconnect',
   ]);
-  while (true) {
+
+  for (;;) {
     const { event, data } = yield take(channel);
     console.log(event, data);
     switch (event) {
@@ -78,7 +79,6 @@ function* handleSocketEvent(socket) {
         const { path } = data;
         yield put(addPathToCanvas([path]));
         const currentUserId = yield select((state) => state.$$chatStore.get('currentUserId'));
-        console.log('check', currentUserId, path.userId);
         if (path.userId === currentUserId) {
           yield put(setVisibleTempPath(false));
         }
@@ -104,14 +104,14 @@ function* handleSocketEvent(socket) {
 }
 
 function* handleRequestJoinChat(socket) {
-  while (true) {
+  for (;;) {
     const { payload: { pass } } = yield take(chatActionTypes.REQUEST_JOIN_CHAT);
     socket.emit('join', { pass });
   }
 }
 
 function* handleSendLogMessage(socket) {
-  while (true) {
+  for (;;) {
     const { payload: { message } } = yield take(chatActionTypes.SEND_LOG_MESSAGE);
     if (message) {
       socket.emit('log', { message });
@@ -121,7 +121,7 @@ function* handleSendLogMessage(socket) {
 }
 
 function* handleSendPath(socket) {
-  while (true) {
+  for (;;) {
     const { payload: { tempPath } } = yield take(canvasActionTypes.SEND_TEMP_PATH);
     const path = {
       data: tempPath,

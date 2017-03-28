@@ -14,20 +14,14 @@
     overflow: hidden
     position: relative
 
-    .canvas-wrapper
+    .shadow-canvas canvas
+      display: none
+
+    .canvas-back,
       position: absolute
-      canvas
-        position: absolute
-        top: 0
-        left: 0
-        transform-origin: left top
+      background-color: white
 
-        &#tempCanvas
-          display: none
-      .canvas-back
-        background-color: white
-
-    #mouseCircleCanvas
+    &>canvas
       position: absolute
 
   .tool-box
@@ -40,6 +34,13 @@
       border: 1px solid black
       margin: 0 10px
 
+    .tool-buttons
+      margin: 10px
+      margin-bottom: 0px
+      button
+        padding: 5px
+        img
+          width: 20px
 
     .sketch-picker
       box-shadow: none!important
@@ -69,6 +70,9 @@
       ul
         margin-bottom: 0px
         font-size: 12px
+
+    .btn:focus, .btn.focus, input:focus, input.focus
+      outline-width: 0px
 
 #user-list-popup ul
   margin-bottom: 0px

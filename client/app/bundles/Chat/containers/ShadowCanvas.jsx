@@ -12,7 +12,14 @@ function setCtxStyle(ctx, style) {
   ctx.strokeStyle = cssColor(style.color);
   ctx.lineWidth = style.width;
   ctx.globalAlpha = style.color.a;
-  ctx.globalCompositeOperation = style.type;
+}
+
+function typeToCompositeOperation(type) {
+  const operations = {
+    pencil: 'source-over',
+    eraser: 'destination-out',
+  };
+  return operations[type] || operations.pencil;
 }
 
 // パスを描画
@@ -31,7 +38,27 @@ function drawPathData(ctx, pathData) {
   ctx.stroke();
 }
 
-class MainCanvas extends React.Component {
+function reflectOnCanvas(dCanvas, sCanvases, sx, sy, sw, sh, backColor = null) {
+  const { width, height } = dCanvas;
+  const ctx = dCanvas.getContext('2d');
+
+  if (backColor) {
+    ctx.fillStyle = backColor;
+    ctx.fillRect(0, 0, width, height);
+  } else {
+    ctx.clearRect(0, 0, width, height);
+  }
+
+  for (const { isDraw, canvas, compositeOperation } of sCanvases) {
+    if (isDraw) {
+      ctx.globalCompositeOperation = compositeOperation;
+      ctx.drawImage(canvas, sx, sy, sw, sh, 0, 0, width, height);
+    }
+  }
+}
+
+
+class ShadowCanvas extends React.Component {
   static propTypes = {
     visibleTempPath: PropTypes.bool.isRequired,
     width: PropTypes.number.isRequired,
@@ -39,6 +66,7 @@ class MainCanvas extends React.Component {
     paths: PropTypes.instanceOf(Immutable.Set).isRequired,
     style: PropTypes.instanceOf(Immutable.Map).isRequired,
     canvas: PropTypes.instanceOf(Immutable.Map).isRequired,
+    mainCanvas: PropTypes.instanceOf(HTMLElement),
     previewCanvas: PropTypes.instanceOf(HTMLElement),
     setDrawTempPathMethod: PropTypes.func.isRequired,
   };
@@ -46,7 +74,8 @@ class MainCanvas extends React.Component {
   static defaultProps = {
     width: 2000,
     height: 2000,
-    previewCanvas: null
+    mainCanvas: null,
+    previewCanvas: null,
   };
 
   componentDidMount() {
@@ -54,20 +83,22 @@ class MainCanvas extends React.Component {
     requestAnimationFrame(this.redraw);
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
+  shouldComponentUpdate(nextProps) {
     const { visibleTempPath, width, height, canvas, paths } = this.props;
     if (width !== nextProps.width ||
       height !== nextProps.height ||
       visibleTempPath !== nextProps.visibleTempPath ||
       !Immutable.is(canvas, nextProps.canvas)
     ) {
+      requestAnimationFrame(() => {
+        this.reflectOnCanvases();
+      });
       return true;
     }
 
     const pathDiff = nextProps.paths.subtract(paths);
-    const refreshMainCanvas = pathDiff.size > 0;
 
-    if (refreshMainCanvas) {
+    if (pathDiff.size > 0) {
       const lastPath = paths.last();
       // 古いパスが変更された場合はredraw
       if (lastPath && lastPath.get('id') > pathDiff.first().get('id')) {
@@ -76,10 +107,8 @@ class MainCanvas extends React.Component {
       }
 
       requestAnimationFrame(() => {
-        if (refreshMainCanvas) {
-          this.drawPaths(pathDiff);
-        }
-        this.reflectOnPreviewCanvas();
+        this.drawPaths(pathDiff);
+        this.reflectOnCanvases();
       });
     }
 
@@ -92,10 +121,12 @@ class MainCanvas extends React.Component {
     }
 
     for (const path of paths) {
-      setCtxStyle(this.tempCtx, path.get('style').toJS());
+      const style = path.get('style').toJS();
+      setCtxStyle(this.tempCtx, style);
       drawPathData(this.tempCtx, path.get('data').toJS());
       // 出力先のキャンバスに反映
-      this.mainCtx.drawImage(this.tempCtx.canvas, 0, 0);
+      this.shadowCtx.globalCompositeOperation = typeToCompositeOperation(style.type);
+      this.shadowCtx.drawImage(this.tempCtx.canvas, 0, 0);
     }
   }
 
@@ -110,31 +141,47 @@ class MainCanvas extends React.Component {
     if (tempPath.length > 0) {
       setCtxStyle(this.myCtx, style.toJS());
       drawPathData(this.myCtx, tempPath);
-      this.reflectOnPreviewCanvas();
+      this.reflectOnCanvases();
     } else {
       this.myCtx.clearRect(0, 0, width, height);
     }
   }
 
   isDrawable() {
-    return this.tempCtx && this.mainCtx && this.myCtx;
+    return this.tempCtx && this.shadowCtx && this.myCtx;
   }
 
-  // 画像にしてpreviewCanvasに反映
-  reflectOnPreviewCanvas() {
-    const { width, height, previewCanvas, visibleTempPath } = this.props;
-    if (!previewCanvas || !this.isDrawable()) {
+  // Canvasに反映
+  reflectOnCanvases() {
+    const { width, height, canvas, style, mainCanvas, previewCanvas, visibleTempPath } = this.props;
+    if (!mainCanvas || !previewCanvas || !this.isDrawable()) {
       return;
     }
 
-    const previewWidth = previewCanvas.width;
-    const previewHeight = previewCanvas.height;
-    const ctx = previewCanvas.getContext('2d');
-    ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, previewWidth, previewHeight);
-    ctx.drawImage(this.mainCtx.canvas, 0, 0, width, height, 0, 0, previewWidth, previewHeight);
-    if (visibleTempPath) {
-      ctx.drawImage(this.myCtx.canvas, 0, 0, width, height, 0, 0, previewWidth, previewHeight);
+    const sCanvases = [
+      {
+        canvas: this.shadowCtx.canvas,
+        compositeOperation: typeToCompositeOperation(),
+        isDraw: true
+      },
+      {
+        canvas: this.myCtx.canvas,
+        compositeOperation: typeToCompositeOperation(style.get('type')),
+        isDraw: visibleTempPath
+      }
+    ];
+
+    if (previewCanvas) {
+      reflectOnCanvas(previewCanvas, sCanvases, 0, 0, width, height, 'white');
+    }
+
+    if (mainCanvas) {
+      const scale = canvas.get('scale');
+      const sx = canvas.get('left');
+      const sy = canvas.get('top');
+      const sw = mainCanvas.width / scale;
+      const sh = mainCanvas.height / scale;
+      reflectOnCanvas(mainCanvas, sCanvases, sx, sy, sw, sh);
     }
   }
 
@@ -144,9 +191,9 @@ class MainCanvas extends React.Component {
       return;
     }
 
-    this.mainCtx.clearRect(0, 0, width, height);
+    this.shadowCtx.clearRect(0, 0, width, height);
     this.drawPaths(paths);
-    this.reflectOnPreviewCanvas();
+    this.reflectOnCanvases();
   }
 
   refCanvasCtx(target) {
@@ -160,28 +207,19 @@ class MainCanvas extends React.Component {
   }
 
   render() {
-    const { visibleTempPath, width, height, canvas } = this.props;
-    const style = {
-      width,
-      height,
-      transform: `scale(${canvas.get('scale')}) translate(-${canvas.get('top')}px, -${canvas.get('left')}px)`
-    };
-    const myCanvasStyle = Object.assign({
-      display: visibleTempPath ? 'block' : 'none'
-    }, style);
+    const { width, height, canvas } = this.props;
 
     return (
-      <div className="canvas-wrapper">
-        <div className="canvas-back" style={style} />
+      <div className="shadow-canvas">
         <canvas id="tempCanvas" width={width} height={height} ref={this.refCanvasCtx('temp')} />
-        <canvas id="mainCanvas" width={width} height={height} ref={this.refCanvasCtx('main')} style={style} />
-        <canvas id="myCanvas" width={width} height={height} ref={this.refCanvasCtx('my')} style={myCanvasStyle} />
+        <canvas id="shadowCanvas" width={width} height={height} ref={this.refCanvasCtx('shadow')} />
+        <canvas id="myCanvas" width={width} height={height} ref={this.refCanvasCtx('my')} />
       </div>
     );
   }
 }
 
-function select(state, ownProps) {
+function select(state) {
   const $$canvasStore = state.$$canvasStore;
 
   return {
@@ -192,4 +230,4 @@ function select(state, ownProps) {
   };
 }
 
-export default connect(select)(MainCanvas);
+export default connect(select)(ShadowCanvas);

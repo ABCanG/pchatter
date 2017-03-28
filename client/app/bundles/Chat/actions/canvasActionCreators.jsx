@@ -42,23 +42,9 @@ export function setStyleType(type) {
   };
 }
 
-export function setCanvasScale(scale) {
+export function setCanvasInfo(canvas) {
   return {
-    type: actionTypes.SET_CANVAS_SCALE,
-    payload: { scale }
-  };
-}
-
-export function setCanvasTop(top) {
-  return {
-    type: actionTypes.SET_CANVAS_TOP,
-    payload: { top }
-  };
-}
-
-export function setCanvasLeft(left) {
-  return {
-    type: actionTypes.SET_CANVAS_LEFT,
-    payload: { left }
+    type: actionTypes.SET_CANVAS_INFO,
+    payload: { canvas }
   };
 }

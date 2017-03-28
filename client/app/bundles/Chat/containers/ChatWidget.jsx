@@ -1,5 +1,5 @@
 import React, { PropTypes } from 'react';
-import { Button, Form, FormControl, Popover, OverlayTrigger } from 'react-bootstrap';
+import { Button, Form, Popover, OverlayTrigger } from 'react-bootstrap';
 import { connect } from 'react-redux';
 import Immutable from 'immutable';
 
@@ -12,6 +12,7 @@ import {
 import { setStyleColor } from '../actions/canvasActionCreators';
 import DrawCanvas from './DrawCanvas';
 import WidthSlider from './WidthSlider';
+import ToolButtons from './ToolButtons';
 
 class ChatWidget extends React.Component {
   static propTypes = {
@@ -91,7 +92,7 @@ class ChatWidget extends React.Component {
             <ul>
               {users.valueSeq().map((user) =>
                 <li key={user.get('id')}>
-                  <img src={user.get('icon_url')} />
+                  <img src={user.get('icon_url')} alt={user.get('name')} />
                   {user.get('name')}
                 </li>
               )}
@@ -110,6 +111,7 @@ class ChatWidget extends React.Component {
         <DrawCanvas previewCanvas={this.previewCanvas} />
         <div className="tool-box">
           <canvas id="previewCanvas" width={200} height={200} ref={this.refPreviewCanvas} />
+          <ToolButtons />
           <SketchPicker width="200px" color={color} onChange={this.handleChangeColor} />
           <WidthSlider />
           <div className="user-list">
@@ -132,7 +134,7 @@ class ChatWidget extends React.Component {
                 <div>
                   <Form inline onSubmit={this.handleJoinChat}>
                     {roomInfo.pass &&
-                      <FormControl
+                      <input
                         type="text"
                         value={pass}
                         placeholder="合言葉"
@@ -148,7 +150,7 @@ class ChatWidget extends React.Component {
             return (
               <div>
                 <Form inline onSubmit={this.handleSendLogMessage}>
-                  <FormControl
+                  <input
                     type="text"
                     value={logMessage}
                     placeholder="Enter text"

@@ -7,9 +7,7 @@ const actionTypes = mirrorCreator([
   'SET_STYLE_COLOR',
   'SET_STYLE_WIDTH',
   'SET_STYLE_TYPE',
-  'SET_CANVAS_SCALE',
-  'SET_CANVAS_TOP',
-  'SET_CANVAS_LEFT',
+  'SET_CANVAS_INFO',
 ]);
 
 export default actionTypes;

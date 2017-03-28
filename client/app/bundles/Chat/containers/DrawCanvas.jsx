@@ -3,14 +3,22 @@ import { connect } from 'react-redux';
 import Immutable from 'immutable';
 import EventListener from 'react-event-listener';
 
-import { setVisibleTempPath, sendTempPath } from '../actions/canvasActionCreators';
-import MainCanvas from './MainCanvas';
+import { setVisibleTempPath, sendTempPath, setCanvasInfo } from '../actions/canvasActionCreators';
+import ShadowCanvas from './ShadowCanvas';
 
-function getMousePosition(e) {
+function getMousePosition(e, scale) {
   const rect = e.target.getBoundingClientRect();
-  return {
+  const original = {
     x: (e.clientX - rect.left) - 1,
     y: (e.clientY - rect.top) - 1,
+  };
+
+  return {
+    original,
+    transformed: {
+      x: original.x / scale,
+      y: original.y / scale,
+    }
   };
 }
 
@@ -38,10 +46,24 @@ class DrawCanvas extends React.Component {
   }
 
   resizeCanvas() {
+    const { dispatch } = this.props;
+    const { offsetWidth, offsetHeight } = this.mouseHandleElement;
+
+    dispatch(setCanvasInfo({
+      width: offsetWidth,
+      height: offsetHeight,
+    }));
+
     if (this.mouseCircleCtx) {
       const canvas = this.mouseCircleCtx.canvas;
-      canvas.width = canvas.parentElement.offsetWidth;
-      canvas.height = canvas.parentElement.offsetHeight;
+      canvas.width = offsetWidth;
+      canvas.height = offsetHeight;
+    }
+
+    if (this.mainCanvas) {
+      const canvas = this.mainCanvas;
+      canvas.width = offsetWidth;
+      canvas.height = offsetHeight;
     }
   }
 
@@ -50,7 +72,7 @@ class DrawCanvas extends React.Component {
   }
 
   handleMouseDown = (e) => {
-    const { dispatch, join } = this.props;
+    const { dispatch, join, canvas } = this.props;
     if (!join) {
       return;
     }
@@ -58,7 +80,8 @@ class DrawCanvas extends React.Component {
     // e.button 0: 左 1: 中 2: 右
     if (!this.isMouseDown) {
       this.isMouseDown = true;
-      this.tempPath = [getMousePosition(e)];
+      const scale = canvas.get('scale');
+      this.tempPath = [getMousePosition(e, scale).transformed];
       this.drawTempPath(this.tempPath);
       dispatch(setVisibleTempPath(true));
     }
@@ -68,16 +91,17 @@ class DrawCanvas extends React.Component {
     window.getSelection().removeAllRanges();
     e.preventDefault();
 
-    const { join } = this.props;
+    const { join, canvas } = this.props;
     if (!join) {
       return;
     }
 
-    const pos = getMousePosition(e);
-    this.drawMousePosition(pos);
+    const scale = canvas.get('scale');
+    const pos = getMousePosition(e, scale);
+    this.drawMousePosition(pos.original);
 
     if (this.isMouseDown) {
-      this.tempPath.push(pos);
+      this.tempPath.push(pos.transformed);
       this.drawTempPath(this.tempPath);
     }
   }
@@ -121,12 +145,12 @@ class DrawCanvas extends React.Component {
     ctx.stroke();
   }
 
-  refCanvasCtx = (element) => {
-    if (element) {
-      this.mouseCircleCtx = element.getContext('2d');
-    } else {
-      this.mouseCircleCtx = null;
-    }
+  refMouseCircleCtx = (element) => {
+    this.mouseCircleCtx = element && element.getContext('2d');
+  }
+
+  refMainCanvas = (element) => {
+    this.mainCanvas = element;
   }
 
   refMouseHandleElement = (element) => {
@@ -140,6 +164,16 @@ class DrawCanvas extends React.Component {
   }
 
   render() {
+    const { canvas } = this.props;
+    const width = 2000;
+    const height = 2000;
+    const style = {
+      width,
+      height,
+      transformOrigin: 'left top',
+      transform: `scale(${canvas.get('scale')}) translate(-${canvas.get('top')}px, -${canvas.get('left')}px)`
+    };
+
     return (
       <div className="draw-canvas"
         ref={this.refMouseHandleElement}>
@@ -152,15 +186,21 @@ class DrawCanvas extends React.Component {
           onMouseMove={this.handleMouseMove}
           onMouseUp={this.handleMouseUp}
           onMouseOut={this.handleMouseOut} />}
-        <MainCanvas previewCanvas={this.props.previewCanvas}
+        <ShadowCanvas
+          width={width}
+          height={height}
+          mainCanvas={this.mainCanvas}
+          previewCanvas={this.props.previewCanvas}
           setDrawTempPathMethod={this.handleSetDrawTempPathMethod} />
-        <canvas id="mouseCircleCanvas" ref={this.refCanvasCtx} />
+        <div className="canvas-back" style={style} />
+        <canvas id="mainCanvas" ref={this.refMainCanvas} />
+        <canvas id="mouseCircleCanvas" ref={this.refMouseCircleCtx} />
       </div>
     );
   }
 }
 
-function select(state, ownProps) {
+function select(state) {
   const $$chatStore = state.$$chatStore;
   const $$canvasStore = state.$$canvasStore;
 
