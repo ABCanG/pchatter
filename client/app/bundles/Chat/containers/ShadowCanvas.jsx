@@ -98,7 +98,16 @@ class ShadowCanvas extends React.Component {
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
     paths: PropTypes.instanceOf(Immutable.Set).isRequired,
-    style: PropTypes.instanceOf(Immutable.Map).isRequired,
+    style: PropTypes.shape({
+      color: PropTypes.shape({
+        r: PropTypes.number.isRequired,
+        g: PropTypes.number.isRequired,
+        b: PropTypes.number.isRequired,
+        a: PropTypes.number.isRequired,
+      }).isRequired,
+      width: PropTypes.number.isRequired,
+      type: PropTypes.string.isRequired,
+    }).isRequired,
     canvas: PropTypes.instanceOf(Immutable.Map).isRequired,
     mainCanvas: PropTypes.instanceOf(HTMLElement),
     previewCanvas: PropTypes.instanceOf(HTMLElement),
@@ -173,7 +182,7 @@ class ShadowCanvas extends React.Component {
     const { width, height, style } = this.props;
 
     if (tempPath.length > 0) {
-      setCtxStyle(this.myCtx, style.toJS());
+      setCtxStyle(this.myCtx, style);
       drawPathData(this.myCtx, tempPath);
       this.reflectOnCanvases();
     } else {
@@ -200,7 +209,7 @@ class ShadowCanvas extends React.Component {
       },
       {
         canvas: this.myCtx.canvas,
-        compositeOperation: typeToCompositeOperation(style.get('type')),
+        compositeOperation: typeToCompositeOperation(style.type),
         isDraw: visibleTempPath
       }
     ];
@@ -258,7 +267,7 @@ function select(state) {
 
   return {
     visibleTempPath: $$canvasStore.get('visibleTempPath'),
-    style: $$canvasStore.get('style'),
+    style: $$canvasStore.get('style').toJS(),
     paths: $$canvasStore.get('paths'),
     canvas: $$canvasStore.get('canvas'),
   };

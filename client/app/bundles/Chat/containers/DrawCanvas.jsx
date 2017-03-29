@@ -23,6 +23,7 @@ class DrawCanvas extends React.Component {
   constructor(props) {
     super(props);
     this.isMouseDown = false;
+    this.lastRequestAnimationFrameId = null;
     this.tempPath = [];
   }
 
@@ -144,9 +145,16 @@ class DrawCanvas extends React.Component {
   }
 
   handleSetDrawTempPathMethod = (drawTempPath) => {
-    this.drawTempPath = (tempPath) => requestAnimationFrame(() => {
-      drawTempPath(tempPath);
-    });
+    this.drawTempPath = (tempPath) => {
+      // 未実行のものがあればキャンセル
+      if (this.lastRequestAnimationFrameId) {
+        cancelAnimationFrame(this.lastRequestAnimationFrameId);
+      }
+      this.lastRequestAnimationFrameId = requestAnimationFrame(() => {
+        this.lastRequestAnimationFrameId = null;
+        drawTempPath(tempPath);
+      });
+    };
   }
 
   render() {
