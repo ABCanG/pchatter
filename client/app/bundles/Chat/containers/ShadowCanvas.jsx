@@ -14,6 +14,13 @@ function setCtxStyle(ctx, style) {
   ctx.globalAlpha = style.color.a;
 }
 
+function getMidPoint(one, another) {
+  return {
+    x: (one.x + another.x) / 2,
+    y: (one.y + another.y) / 2,
+  };
+}
+
 function typeToCompositeOperation(type) {
   const operations = {
     pencil: 'source-over',
@@ -24,18 +31,45 @@ function typeToCompositeOperation(type) {
 
 // パスを描画
 function drawPathData(ctx, pathData) {
-  const [firstPoint, ...restPoint] = pathData;
+  const length = pathData.length;
+
+  if (!length) {
+    return;
+  }
 
   // 画面クリア
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-  // 線を引く
-  ctx.beginPath();
-  ctx.moveTo(firstPoint.x, firstPoint.y);
-  for (const point of restPoint) {
-    ctx.lineTo(point.x, point.y);
+  if (length < 3) {
+    // 直線を引く
+    ctx.beginPath();
+    const firstPoint = pathData[0];
+    ctx.moveTo(firstPoint.x, firstPoint.y);
+    for (const point of pathData) {
+      ctx.lineTo(point.x, point.y);
+    }
+    ctx.stroke();
+  } else {
+    const [firstPoint, ...restPoint] = pathData;
+    const lastPoint = pathData[length - 1];
+    const firstMidPoint = getMidPoint(firstPoint, pathData[1]);
+
+    // 最初と最後は直線、途中はベジェ曲線を引く
+    ctx.beginPath();
+    ctx.moveTo(firstPoint.x, firstPoint.y);
+    ctx.lineTo(firstMidPoint.x, firstMidPoint.y);
+    restPoint.forEach((point, index, points) => {
+      const nextPoint = points[index + 1];
+      if (!nextPoint) {
+        return;
+      }
+
+      const midPoint = getMidPoint(point, nextPoint);
+      ctx.quadraticCurveTo(point.x, point.y, midPoint.x, midPoint.y);
+    });
+    ctx.lineTo(lastPoint.x, lastPoint.y);
+    ctx.stroke();
   }
-  ctx.stroke();
 }
 
 function reflectOnCanvas(dCanvas, sCanvases, sx, sy, sw, sh, backColor = null) {

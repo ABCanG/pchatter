@@ -104,7 +104,7 @@ class DrawCanvas extends React.Component {
   }
 
   handleMouseOut = () => {
-    this.isMouseDown = false;
+    this.handleMouseUp();
     this.clearMousePositionCanvas();
   }
 
