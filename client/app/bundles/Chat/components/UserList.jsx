@@ -31,7 +31,7 @@ const UserList = (props) => {
   return (
     <div className="user-list">
       <OverlayTrigger placement="left" overlay={renderPopoverUserList(users)}>
-        <span>ユーザ({users.size}人) | 閲覧(hoge人)</span>
+        <span>ユーザ({users.size}人){false /* TODO */ && '| 閲覧(hoge人)'}</span>
       </OverlayTrigger>
     </div>
   );
