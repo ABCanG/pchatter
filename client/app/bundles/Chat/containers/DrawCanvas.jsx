@@ -4,7 +4,7 @@ import Immutable from 'immutable';
 import EventListener from 'react-event-listener';
 
 import { setVisibleTempPath, sendTempPath, setCanvasInfo } from '../actions/canvasActionCreators';
-import ShadowCanvas from './ShadowCanvas';
+import OffscreenCanvas from './OffscreenCanvas';
 import { getMousePosition } from '../utils';
 
 class DrawCanvas extends React.Component {
@@ -180,7 +180,7 @@ class DrawCanvas extends React.Component {
           onMouseMove={this.handleMouseMove}
           onMouseUp={this.handleMouseUp}
           onMouseOut={this.handleMouseOut} />}
-        <ShadowCanvas
+        <OffscreenCanvas
           width={width}
           height={height}
           mainCanvas={this.mainCanvas}

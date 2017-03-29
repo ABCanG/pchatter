@@ -6,9 +6,12 @@ function cssColor(c) {
   return `rgb(${c.r},${c.g},${c.b})`;
 }
 
-function setCtxStyle(ctx, style) {
+function initCtxStyle(ctx) {
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
+}
+
+function setCtxStyle(ctx, style) {
   ctx.strokeStyle = cssColor(style.color);
   ctx.lineWidth = style.width;
   ctx.globalAlpha = style.color.a;
@@ -92,7 +95,7 @@ function reflectOnCanvas(dCanvas, sCanvases, sx, sy, sw, sh, backColor = null) {
 }
 
 
-class ShadowCanvas extends React.Component {
+class OffscreenCanvas extends React.Component {
   static propTypes = {
     visibleTempPath: PropTypes.bool.isRequired,
     width: PropTypes.number.isRequired,
@@ -168,8 +171,8 @@ class ShadowCanvas extends React.Component {
       setCtxStyle(this.tempCtx, style);
       drawPathData(this.tempCtx, path.get('data').toJS());
       // 出力先のキャンバスに反映
-      this.shadowCtx.globalCompositeOperation = typeToCompositeOperation(style.type);
-      this.shadowCtx.drawImage(this.tempCtx.canvas, 0, 0);
+      this.offscreenCtx.globalCompositeOperation = typeToCompositeOperation(style.type);
+      this.offscreenCtx.drawImage(this.tempCtx.canvas, 0, 0);
     }
   }
 
@@ -191,7 +194,7 @@ class ShadowCanvas extends React.Component {
   }
 
   isDrawable() {
-    return this.tempCtx && this.shadowCtx && this.myCtx;
+    return this.tempCtx && this.offscreenCtx && this.myCtx;
   }
 
   // Canvasに反映
@@ -203,7 +206,7 @@ class ShadowCanvas extends React.Component {
 
     const sCanvases = [
       {
-        canvas: this.shadowCtx.canvas,
+        canvas: this.offscreenCtx.canvas,
         compositeOperation: typeToCompositeOperation(),
         isDraw: true
       },
@@ -234,7 +237,11 @@ class ShadowCanvas extends React.Component {
       return;
     }
 
-    this.shadowCtx.clearRect(0, 0, width, height);
+    initCtxStyle(this.offscreenCtx);
+    initCtxStyle(this.tempCtx);
+    initCtxStyle(this.myCtx);
+
+    this.offscreenCtx.clearRect(0, 0, width, height);
     this.drawPaths(paths);
     this.reflectOnCanvases();
   }
@@ -253,9 +260,9 @@ class ShadowCanvas extends React.Component {
     const { width, height, canvas } = this.props;
 
     return (
-      <div className="shadow-canvas">
+      <div className="offscreen-canvas">
         <canvas id="tempCanvas" width={width} height={height} ref={this.refCanvasCtx('temp')} />
-        <canvas id="shadowCanvas" width={width} height={height} ref={this.refCanvasCtx('shadow')} />
+        <canvas id="offscreenCanvas" width={width} height={height} ref={this.refCanvasCtx('offscreen')} />
         <canvas id="myCanvas" width={width} height={height} ref={this.refCanvasCtx('my')} />
       </div>
     );
@@ -273,4 +280,4 @@ function select(state) {
   };
 }
 
-export default connect(select)(ShadowCanvas);
+export default connect(select)(OffscreenCanvas);
