@@ -34,22 +34,21 @@ class DrawCanvas extends React.Component {
   resizeCanvas() {
     const { dispatch } = this.props;
     const { offsetWidth, offsetHeight } = this.mouseHandleElement;
+    const width = offsetWidth - 2;
+    const height = offsetHeight - 2;
 
-    dispatch(setCanvasInfo({
-      width: offsetWidth,
-      height: offsetHeight,
-    }));
+    dispatch(setCanvasInfo({ width, height }));
 
     if (this.mouseCircleCtx) {
       const canvas = this.mouseCircleCtx.canvas;
-      canvas.width = offsetWidth;
-      canvas.height = offsetHeight;
+      canvas.width = width;
+      canvas.height = height;
     }
 
     if (this.mainCanvas) {
       const canvas = this.mainCanvas;
-      canvas.width = offsetWidth;
-      canvas.height = offsetHeight;
+      canvas.width = width;
+      canvas.height = height;
     }
   }
 
@@ -187,8 +186,8 @@ class DrawCanvas extends React.Component {
           previewCanvas={this.props.previewCanvas}
           setDrawTempPathMethod={this.handleSetDrawTempPathMethod} />
         <div className="canvas-back" style={style} />
-        <canvas id="mainCanvas" ref={this.refMainCanvas} />
-        <canvas id="mouseCircleCanvas" ref={this.refMouseCircleCtx} />
+        <canvas ref={this.refMainCanvas} />
+        <canvas ref={this.refMouseCircleCtx} />
       </div>
     );
   }

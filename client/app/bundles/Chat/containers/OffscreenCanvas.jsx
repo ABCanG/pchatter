@@ -2,13 +2,20 @@ import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
 import Immutable from 'immutable';
 
-function cssColor(c) {
-  return `rgb(${c.r},${c.g},${c.b})`;
-}
+function createCtx(width, height) {
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
 
-function initCtxStyle(ctx) {
+  const ctx = canvas.getContext('2d');
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
+
+  return ctx;
+}
+
+function cssColor(c) {
+  return `rgb(${c.r},${c.g},${c.b})`;
 }
 
 function setCtxStyle(ctx, style) {
@@ -124,6 +131,17 @@ class OffscreenCanvas extends React.Component {
     previewCanvas: null,
   };
 
+  constructor(props) {
+    super(props);
+    const { width, height } = props;
+    const offscrenNames = ['temp', 'main', 'my', 'previewCache', 'mainCache'];
+
+    this.ctx = offscrenNames.reduce((ctx, name) => {
+      ctx[name] = createCtx(width, height);
+      return ctx;
+    }, {});
+  }
+
   componentDidMount() {
     this.props.setDrawTempPathMethod(this.drawTempPath);
     requestAnimationFrame(this.redraw);
@@ -162,56 +180,44 @@ class OffscreenCanvas extends React.Component {
   }
 
   drawPaths(paths) {
-    if (!this.isDrawable()) {
-      return;
-    }
-
     for (const path of paths) {
       const style = path.get('style').toJS();
-      setCtxStyle(this.tempCtx, style);
-      drawPathData(this.tempCtx, path.get('data').toJS());
+      setCtxStyle(this.ctx.temp, style);
+      drawPathData(this.ctx.temp, path.get('data').toJS());
       // 出力先のキャンバスに反映
-      this.offscreenCtx.globalCompositeOperation = typeToCompositeOperation(style.type);
-      this.offscreenCtx.drawImage(this.tempCtx.canvas, 0, 0);
+      this.ctx.main.globalCompositeOperation = typeToCompositeOperation(style.type);
+      this.ctx.main.drawImage(this.ctx.temp.canvas, 0, 0);
     }
   }
 
   // 親から呼ばれる
   drawTempPath = (tempPath) => {
-    if (!this.isDrawable()) {
-      return;
-    }
-
     const { width, height, style } = this.props;
 
     if (tempPath.length > 0) {
-      setCtxStyle(this.myCtx, style);
-      drawPathData(this.myCtx, tempPath);
+      setCtxStyle(this.ctx.my, style);
+      drawPathData(this.ctx.my, tempPath);
       this.reflectOnCanvases();
     } else {
-      this.myCtx.clearRect(0, 0, width, height);
+      this.ctx.my.clearRect(0, 0, width, height);
     }
-  }
-
-  isDrawable() {
-    return this.tempCtx && this.offscreenCtx && this.myCtx;
   }
 
   // Canvasに反映
   reflectOnCanvases() {
     const { width, height, canvas, style, mainCanvas, previewCanvas, visibleTempPath } = this.props;
-    if (!mainCanvas || !previewCanvas || !this.isDrawable()) {
+    if (!mainCanvas || !previewCanvas) {
       return;
     }
 
     const sCanvases = [
       {
-        canvas: this.offscreenCtx.canvas,
+        canvas: this.ctx.main.canvas,
         compositeOperation: typeToCompositeOperation(),
         isDraw: true
       },
       {
-        canvas: this.myCtx.canvas,
+        canvas: this.ctx.my.canvas,
         compositeOperation: typeToCompositeOperation(style.type),
         isDraw: visibleTempPath
       }
@@ -233,38 +239,15 @@ class OffscreenCanvas extends React.Component {
 
   redraw = () => {
     const { width, height, paths } = this.props;
-    if (!this.isDrawable()) {
-      return;
-    }
 
-    initCtxStyle(this.offscreenCtx);
-    initCtxStyle(this.tempCtx);
-    initCtxStyle(this.myCtx);
-
-    this.offscreenCtx.clearRect(0, 0, width, height);
+    this.ctx.main.clearRect(0, 0, width, height);
     this.drawPaths(paths);
     this.reflectOnCanvases();
   }
 
-  refCanvasCtx(target) {
-    return (element) => {
-      if (element) {
-        this[`${target}Ctx`] = element.getContext('2d');
-      } else {
-        this[`${target}Ctx`] = null;
-      }
-    };
-  }
-
   render() {
-    const { width, height, canvas } = this.props;
-
     return (
-      <div className="offscreen-canvas">
-        <canvas id="tempCanvas" width={width} height={height} ref={this.refCanvasCtx('temp')} />
-        <canvas id="offscreenCanvas" width={width} height={height} ref={this.refCanvasCtx('offscreen')} />
-        <canvas id="myCanvas" width={width} height={height} ref={this.refCanvasCtx('my')} />
-      </div>
+      <div className="offscreen-canvas" />
     );
   }
 }

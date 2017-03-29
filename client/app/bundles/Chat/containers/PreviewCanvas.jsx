@@ -83,7 +83,7 @@ class PreviewCanvas extends React.Component {
         onMouseUp={this.handleMouseUp}
         onMouseOut={this.handleMouseOut}
         ref={this.refPreviewElement}>
-        <canvas id="previewCanvas" width={200} height={200} ref={this.props.refPreviewCanvas} />
+        <canvas width={200} height={200} ref={this.props.refPreviewCanvas} />
         <div className="preview-frame" style={style} />
       </div>
     );
