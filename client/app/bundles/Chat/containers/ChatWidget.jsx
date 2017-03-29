@@ -1,4 +1,5 @@
 import React, { PropTypes } from 'react';
+import { Button } from 'react-bootstrap';
 import { connect } from 'react-redux';
 import Immutable from 'immutable';
 import { SketchPicker } from 'react-color';
@@ -18,8 +19,11 @@ class ChatWidget extends React.Component {
   static propTypes = {
     roomInfo: PropTypes.shape({
       id: PropTypes.number.isRequired,
+      name: PropTypes.string.isRequired,
       pass: PropTypes.bool.isRequired,
       hidden: PropTypes.bool.isRequired,
+      owner: PropTypes.bool.isRequired,
+      edit: PropTypes.string.isRequired,
     }).isRequired,
     currentUserId: PropTypes.number,
     color: PropTypes.shape({
@@ -54,23 +58,30 @@ class ChatWidget extends React.Component {
     this.previewCanvas = element;
   }
 
-  // TODO: hideオプション時の処理
-  // TODO: 参加前にはいろいろなボタンを隠す
   render() {
-    const { color, users, logs, join } = this.props;
+    const { color, users, logs, join, roomInfo } = this.props;
 
     return (
-      <div className="chatroom">
-        <DrawCanvas previewCanvas={this.previewCanvas} />
-        <div className="tool-box">
-          <PreviewCanvas refPreviewCanvas={this.refPreviewCanvas} />
-          <ToolButtons />
-          <SketchPicker width="200px" color={color} onChange={this.handleChangeColor} />
-          <WidthSlider />
-          <UserList users={users} />
-          <ChatLogs logs={logs} />
-          {join ? <SubmitLogForm /> : <JoinChatForm />}
+      <div className="chatroom-wrapper">
+        <div className="room-name h3">
+          <span>ルーム: {roomInfo.name}</span>
+          {roomInfo.owner && <Button className="pull-right" bsSize="small" href={roomInfo.edit}>ルームを編集</Button>}
         </div>
+        {!join && <JoinChatForm />}
+        {(join || !roomInfo.hidden) && <div className="chatroom">
+          <DrawCanvas previewCanvas={this.previewCanvas} />
+          <div className="tool-box">
+            <PreviewCanvas refPreviewCanvas={this.refPreviewCanvas} />
+            <ToolButtons />
+            {join && <div>
+              <SketchPicker width="200px" color={color} onChange={this.handleChangeColor} />
+              <WidthSlider />
+            </div>}
+            <UserList users={users} />
+            <ChatLogs logs={logs} />
+            {join && <SubmitLogForm />}
+          </div>
+        </div>}
       </div>
     );
   }
@@ -79,11 +90,11 @@ class ChatWidget extends React.Component {
 function select(state, ownProps) {
   const $$chatStore = state.$$chatStore;
   const $$canvasStore = state.$$canvasStore;
-  const { currentUserId, id, pass, hidden } = ownProps;
+  const { currentUserId, id, name, pass, hidden, owner, edit } = ownProps;
 
   return {
     currentUserId,
-    roomInfo: { id, pass, hidden },
+    roomInfo: { id, name, pass, hidden, owner, edit },
     users: $$chatStore.get('users'),
     logs: $$chatStore.get('logs'),
     join: $$chatStore.get('join'),

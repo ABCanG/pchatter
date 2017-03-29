@@ -1,5 +1,5 @@
 import React, { PropTypes } from 'react';
-import { Button, Form } from 'react-bootstrap';
+import { Button, Form, FormGroup, FormControl, HelpBlock } from 'react-bootstrap';
 import { connect } from 'react-redux';
 import Immutable from 'immutable';
 
@@ -9,6 +9,7 @@ class JoinChatForm extends React.Component {
   static propTypes = {
     info: PropTypes.instanceOf(Immutable.Map).isRequired,
     pass: PropTypes.string.isRequired,
+    joinFailureMessage: PropTypes.string.isRequired,
     dispatch: PropTypes.func.isRequired,
   };
 
@@ -24,18 +25,21 @@ class JoinChatForm extends React.Component {
   };
 
   render() {
-    const { info, pass } = this.props;
+    const { info, pass, joinFailureMessage } = this.props;
     return (
-      <Form inline onSubmit={this.handleJoinChat}>
-        {info.get('pass') &&
-          <input
-            type="text"
-            value={pass}
-            placeholder="合言葉"
-            onChange={this.handleChangeRoomPass}
-            />
-        }
-        <Button type="submit" bsStyle="primary">参加</Button>
+      <Form inline onSubmit={this.handleJoinChat} className="chatroom-join-form">
+        <FormGroup validationState={joinFailureMessage ? 'error' : null}>
+          {info.get('pass') &&
+            <FormControl
+              type="text"
+              value={pass}
+              placeholder="合言葉"
+              onChange={this.handleChangeRoomPass}
+              />
+          }
+          <Button type="submit" bsStyle="primary">参加</Button>
+          {joinFailureMessage && <HelpBlock>{joinFailureMessage}</HelpBlock>}
+        </FormGroup>
       </Form>
     );
   }
@@ -47,6 +51,7 @@ function select(state) {
   return {
     info: $$chatStore.get('info'),
     pass: $$chatStore.get('pass'),
+    joinFailureMessage: $$chatStore.get('joinFailureMessage'),
   };
 }
 

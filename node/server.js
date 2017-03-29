@@ -99,7 +99,7 @@ chat.on('connection', async (socket) => {
     if (room.pass !== pass) {
       socket.emit('join', {
         status: 'failed',
-        message: '合言葉が合っていません'
+        message: '合言葉が違います'
       });
       return;
     }

@@ -1,10 +1,18 @@
-.chatroom
+.chatroom-wrapper
   position: absolute
   left: 10px
   top: 60px
   right: 10px
   bottom: 10px
   display: flex
+  flex-direction: column
+
+  .room-name
+    margin-top: 0px
+
+.chatroom
+  display: flex
+  flex: 1
 
   .draw-canvas
     flex: 1
@@ -56,7 +64,6 @@
       box-shadow: none!important
 
     .slider
-      margin-bottom: 10px
       input
         width: 50px
         font-size: 12px
@@ -74,6 +81,9 @@
       padding-bottom: 5px
       padding-left: 10px
 
+    .user-list
+      margin-top: 10px
+
     .chat-logs
       flex: 1
       overflow-y: scroll
@@ -84,18 +94,20 @@
     .btn:focus, .btn.focus, input:focus, input.focus
       outline-width: 0px
 
+    .form-inline
+      display: flex
+      & > *:first-child
+        flex: 1
+
+.chatroom-join-form
+  margin-bottom: 10px
+
 #user-list-popup ul
   margin-bottom: 0px
   img
     width: 24px
     height: 24px
     margin-right: 5px
-
-
-.form-inline
-  display: flex
-  & > *:first-child
-    flex: 1
 
 ul
   list-style-type: none

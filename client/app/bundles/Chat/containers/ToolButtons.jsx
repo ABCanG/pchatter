@@ -19,6 +19,7 @@ class ChatWidget extends React.Component {
   static propTypes = {
     type: PropTypes.string.isRequired,
     canvas: PropTypes.instanceOf(Immutable.Map).isRequired,
+    join: PropTypes.bool.isRequired,
     dispatch: PropTypes.func.isRequired,
   };
 
@@ -48,19 +49,19 @@ class ChatWidget extends React.Component {
   }
 
   render() {
-    const { type } = this.props;
+    const { type, join } = this.props;
 
     return (
       <div className="tool-buttons">
-        <Button onClick={this.handleClickPencil} className={type === 'pencil' ? 'active' : null}>
+        {join && <Button onClick={this.handleClickPencil} className={type === 'pencil' ? 'active' : null}>
           <img src="/assets/pencil.png" alt="pencil" />
-        </Button>
-        <Button onClick={this.handleClickEraser} className={type === 'eraser' ? 'active' : null}>
+        </Button>}
+        {join && <Button onClick={this.handleClickEraser} className={type === 'eraser' ? 'active' : null}>
           <img src="/assets/eraser.png" alt="eraser" />
-        </Button>
-        <Button onClick={this.handleClickColorPicker} className={type === 'color-picker' ? 'active' : null}>
+        </Button>}
+        {false/* TODO */ && <Button onClick={this.handleClickColorPicker} className={type === 'color-picker' ? 'active' : null}>
           <img src="/assets/color-picker.png" alt="color picker" />
-        </Button>
+        </Button>}
         <Button onClick={this.handleClickZoomIn}>
           <img src="/assets/zoom-in.png" alt="zoom in" />
         </Button>
@@ -73,9 +74,11 @@ class ChatWidget extends React.Component {
 }
 
 function select(state) {
+  const $$chatStore = state.$$chatStore;
   const $$canvasStore = state.$$canvasStore;
 
   return {
+    join: $$chatStore.get('join'),
     type: $$canvasStore.getIn(['style', 'type']),
     canvas: $$canvasStore.get('canvas'),
   };

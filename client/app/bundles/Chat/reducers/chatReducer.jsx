@@ -60,7 +60,7 @@ export default function chatReducer($$state = $$initialState, action) {
     case actionTypes.FAILURE_JOIN_CHAT: {
       return $$state.withMutations((s) => (
         s.set('join', false)
-          .set('joinFailureMessage', payload.message)
+          .set('joinFailureMessage', payload.error)
       ));
     }
 
