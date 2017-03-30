@@ -14,14 +14,11 @@ function createCtx(width, height) {
   return ctx;
 }
 
-function cssColor(c) {
-  return `rgb(${c.r},${c.g},${c.b})`;
-}
-
 function setCtxStyle(ctx, style) {
-  ctx.strokeStyle = cssColor(style.color);
-  ctx.lineWidth = style.width;
+  const c = style.color;
+  ctx.strokeStyle = `rgb(${c.r},${c.g},${c.b})`;
   ctx.globalAlpha = style.color.a;
+  ctx.lineWidth = style.width;
 }
 
 function getMidPoint(one, another) {
@@ -39,6 +36,16 @@ function typeToCompositeOperation(type) {
   return operations[type] || operations.pencil;
 }
 
+function getMainCanvasTrimInfo(canvas, mainCanvas) {
+  const { width: mainWidth, height: mainHeght } = mainCanvas;
+  const scale = canvas.get('scale');
+  const sx = canvas.get('left');
+  const sy = canvas.get('top');
+  const sw = mainWidth / scale;
+  const sh = mainHeght / scale;
+  return {sx, sy, sw, sh};
+}
+
 // パスを描画
 function drawPathData(ctx, pathData) {
   const length = pathData.length;
@@ -46,9 +53,6 @@ function drawPathData(ctx, pathData) {
   if (!length) {
     return;
   }
-
-  // 画面クリア
-  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
   if (length < 3) {
     // 直線を引く
@@ -82,23 +86,24 @@ function drawPathData(ctx, pathData) {
   }
 }
 
-function reflectOnCanvas(dCanvas, sCanvases, sx, sy, sw, sh, backColor = null) {
-  const { width, height } = dCanvas;
-  const ctx = dCanvas.getContext('2d');
+function resizeImage(dCanvas, dw, dh, sCanvas, sx, sy, sw, sh, tempCanvas = null) {
+  const tmpCanvas = tempCanvas || dCanvas;
+  const ctx = tmpCanvas.getContext('2d');
+  const scale = Math.max(Math.max(sw, sh) / tmpCanvas.width, 1);
 
-  if (backColor) {
-    ctx.fillStyle = backColor;
-    ctx.fillRect(0, 0, width, height);
-  } else {
-    ctx.clearRect(0, 0, width, height);
+  let tempWidth = sw / scale;
+  let tempHeight = sh / scale;
+
+  ctx.drawImage(sCanvas, sx, sy, sw, sh, 0, 0, tempWidth, tempHeight);
+  while (tempWidth / dw > 2) {
+    const nextWidth = tempWidth / 2;
+    const nextHeight = tempHeight / 2;
+    ctx.drawImage(tmpCanvas, 0, 0, tempWidth, tempHeight, 0, 0, nextWidth, nextHeight);
+    tempWidth = nextWidth;
+    tempHeight = nextHeight;
   }
 
-  for (const { isDraw, canvas, compositeOperation } of sCanvases) {
-    if (isDraw) {
-      ctx.globalCompositeOperation = compositeOperation;
-      ctx.drawImage(canvas, sx, sy, sw, sh, 0, 0, width, height);
-    }
-  }
+  dCanvas.getContext('2d').drawImage(tmpCanvas, 0, 0, tempWidth, tempHeight, 0, 0, dw, dh);
 }
 
 
@@ -136,10 +141,17 @@ class OffscreenCanvas extends React.Component {
     const { width, height } = props;
     const offscrenNames = ['temp', 'main', 'my', 'previewCache', 'mainCache'];
 
+    this.tempPath = [];
+
     this.ctx = offscrenNames.reduce((ctx, name) => {
       ctx[name] = createCtx(width, height);
       return ctx;
     }, {});
+
+    this.ctx.temp.globalCompositeOperation = 'copy';
+    this.ctx.my.globalCompositeOperation = 'copy';
+    this.ctx.previewCache.globalCompositeOperation = 'copy';
+    this.ctx.mainCache.globalCompositeOperation = 'copy';
   }
 
   componentDidMount() {
@@ -148,14 +160,18 @@ class OffscreenCanvas extends React.Component {
   }
 
   shouldComponentUpdate(nextProps) {
-    const { visibleTempPath, width, height, canvas, paths } = this.props;
-    if (width !== nextProps.width ||
-      height !== nextProps.height ||
-      visibleTempPath !== nextProps.visibleTempPath ||
-      !Immutable.is(canvas, nextProps.canvas)
-    ) {
+    const { visibleTempPath, canvas, paths } = this.props;
+    const isRefreshPreview = visibleTempPath !== nextProps.visibleTempPath;
+    const isRefreshMain = !Immutable.is(canvas, nextProps.canvas);
+    if (isRefreshPreview || isRefreshMain) {
       requestAnimationFrame(() => {
-        this.reflectOnCanvases();
+        if (isRefreshPreview) {
+          this.reflectOnPreviewCanvas();
+        }
+        if (isRefreshMain) {
+          this.makeOffscreenMainCache();
+          this.reflectOnMainCanvas();
+        }
       });
       return true;
     }
@@ -171,22 +187,30 @@ class OffscreenCanvas extends React.Component {
       }
 
       requestAnimationFrame(() => {
-        this.drawPaths(pathDiff);
-        this.reflectOnCanvases();
+        const rawPathDiff = pathDiff.toJS();
+        this.drawPaths(rawPathDiff, this.ctx.main);
+        this.drawPaths(rawPathDiff, this.ctx.previewCache, 0.1);
+        this.reflectOnPreviewCanvas();
+        this.makeOffscreenMainCache();
+        this.reflectOnMainCanvas();
       });
     }
 
     return false;
   }
 
-  drawPaths(paths) {
-    for (const path of paths) {
-      const style = path.get('style').toJS();
-      setCtxStyle(this.ctx.temp, style);
-      drawPathData(this.ctx.temp, path.get('data').toJS());
+  drawPaths(paths, targetCtx, scale = 1) {
+    const tempCtx = this.ctx.temp;
+    for (const { style, data } of paths) {
+      tempCtx.save();
+      setCtxStyle(tempCtx, style);
+      tempCtx.scale(scale, scale);
+      drawPathData(tempCtx, data);
+      tempCtx.restore();
+
       // 出力先のキャンバスに反映
-      this.ctx.main.globalCompositeOperation = typeToCompositeOperation(style.type);
-      this.ctx.main.drawImage(this.ctx.temp.canvas, 0, 0);
+      targetCtx.globalCompositeOperation = typeToCompositeOperation(style.type);
+      targetCtx.drawImage(tempCtx.canvas, 0, 0);
     }
   }
 
@@ -194,55 +218,85 @@ class OffscreenCanvas extends React.Component {
   drawTempPath = (tempPath) => {
     const { width, height, style } = this.props;
 
+    this.tempPath = tempPath;
+
     if (tempPath.length > 0) {
       setCtxStyle(this.ctx.my, style);
       drawPathData(this.ctx.my, tempPath);
-      this.reflectOnCanvases();
+      this.reflectOnPreviewCanvas();
+      this.reflectOnMainCanvas();
     } else {
       this.ctx.my.clearRect(0, 0, width, height);
     }
   }
 
-  // Canvasに反映
-  reflectOnCanvases() {
-    const { width, height, canvas, style, mainCanvas, previewCanvas, visibleTempPath } = this.props;
-    if (!mainCanvas || !previewCanvas) {
+  makeOffscreenMainCache() {
+    const { canvas, mainCanvas } = this.props;
+    if (mainCanvas) {
+      const { width: mainWidth, height: mainHeght } = mainCanvas;
+      const { sx, sy, sw, sh } = getMainCanvasTrimInfo(canvas, mainCanvas);
+      const cacheCanvas = this.ctx.mainCache.canvas;
+      const target = this.ctx.main.canvas;
+      resizeImage(cacheCanvas, mainWidth, mainHeght, target, sx, sy, sw, sh);
+    }
+  }
+
+  reflectOnPreviewCanvas() {
+    const { style, previewCanvas, visibleTempPath } = this.props;
+    if (!previewCanvas) {
       return;
     }
 
-    const sCanvases = [
-      {
-        canvas: this.ctx.main.canvas,
-        compositeOperation: typeToCompositeOperation(),
-        isDraw: true
-      },
-      {
-        canvas: this.ctx.my.canvas,
-        compositeOperation: typeToCompositeOperation(style.type),
-        isDraw: visibleTempPath
-      }
-    ];
+    const ctx = previewCanvas.getContext('2d');
+    const cacheCanvas = this.ctx.previewCache.canvas;
+    const { width: pWidth, height: pHeght } = previewCanvas;
 
-    if (previewCanvas) {
-      reflectOnCanvas(previewCanvas, sCanvases, 0, 0, width, height, 'white');
+    ctx.fillStyle = 'white';
+    ctx.globalCompositeOperation = typeToCompositeOperation();
+    ctx.fillRect(0, 0, pWidth, pHeght);
+    ctx.drawImage(cacheCanvas, 0, 0, pWidth, pHeght, 0, 0, pWidth, pHeght);
+
+    // 自分の引いた線を反映
+    if (visibleTempPath) {
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      this.drawPaths([{ style, data: this.tempPath }], ctx, 0.1);
     }
+  }
 
+  reflectOnMainCanvas() {
+    const { canvas, style, mainCanvas, visibleTempPath } = this.props;
     if (mainCanvas) {
-      const scale = canvas.get('scale');
-      const sx = canvas.get('left');
-      const sy = canvas.get('top');
-      const sw = mainCanvas.width / scale;
-      const sh = mainCanvas.height / scale;
-      reflectOnCanvas(mainCanvas, sCanvases, sx, sy, sw, sh);
+      const ctx = mainCanvas.getContext('2d');
+      const { width: mainWidth, height: mainHeght } = mainCanvas;
+      const cacheCanvas = this.ctx.mainCache.canvas;
+
+      ctx.clearRect(0, 0, mainWidth, mainHeght);
+      ctx.globalCompositeOperation = typeToCompositeOperation();
+      ctx.drawImage(cacheCanvas, 0, 0, mainWidth, mainHeght, 0, 0, mainWidth, mainHeght);
+
+      // 自分の引いた線を反映
+      if (visibleTempPath) {
+        const { sx, sy, sw, sh } = getMainCanvasTrimInfo(canvas, mainCanvas);
+        const target = this.ctx.my.canvas;
+        const temp = this.ctx.temp.canvas;
+        ctx.globalCompositeOperation = typeToCompositeOperation(style.type);
+        // TODO resizeImageを使わないように
+        resizeImage(mainCanvas, mainWidth, mainHeght, target, sx, sy, sw, sh, temp);
+      }
     }
   }
 
   redraw = () => {
     const { width, height, paths } = this.props;
-
+    const rawPaths = paths.toJS();
     this.ctx.main.clearRect(0, 0, width, height);
-    this.drawPaths(paths);
-    this.reflectOnCanvases();
+    this.drawPaths(rawPaths, this.ctx.main);
+    this.ctx.previewCache.clearRect(0, 0, width, height);
+    this.drawPaths(rawPaths, this.ctx.previewCache, 0.1);
+    this.reflectOnPreviewCanvas();
+    this.makeOffscreenMainCache();
+    this.reflectOnMainCanvas();
   }
 
   render() {
