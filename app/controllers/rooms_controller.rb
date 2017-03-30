@@ -63,6 +63,16 @@ class RoomsController < ApplicationController
     end
   end
 
+  def thumbnail
+    path = @room.thumbnail_raw_path
+    if path.exist?
+      expires_in 1.minute
+      send_file path, type: 'image/png', disposition: 'inline'
+    else
+      render_not_found
+    end
+  end
+
   private
 
   # Use callbacks to share common setup or constraints between actions.

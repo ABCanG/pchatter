@@ -19,6 +19,7 @@
 
       <ul class="nav navbar-right">
         <% if user_signed_in? %>
+        <li><%= link_to 'ルーム一覧', rooms_path, class: 'navbar-link hidden-xs' %></li>
         <li><%= link_to '部屋を作る', new_room_path, class: 'navbar-link hidden-xs' %></li>
 
         <li class="dropdown">

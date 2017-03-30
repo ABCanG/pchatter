@@ -11,6 +11,8 @@
 #
 
 class Room < ApplicationRecord
+  include Redis::Objects
+  hash_key :users
   acts_as_hashids length: 10
 
   belongs_to :user
@@ -18,4 +20,12 @@ class Room < ApplicationRecord
   validates :name, presence: true, length: { maximum: 63 }
   validates :pass, length: { maximum: 63 }
   validates :user_id, presence: true
+
+  def thumbnail_raw_path
+    Rails.root.join('generated', 'thumbnail', "#{id}.png")
+  end
+
+  def entrant
+    @entrant ||= users.values.map{|data| JSON.parse data, symbolize_names: true}
+  end
 end

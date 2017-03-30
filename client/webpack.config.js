@@ -1,5 +1,9 @@
+/* eslint comma-dangle: ["error",
+ {"functions": "never", "arrays": "only-multiline", "objects":
+ "only-multiline"} ] */
+
 const webpack = require('webpack');
-const path = require('path');
+const pathLib = require('path');
 
 const devBuild = process.env.NODE_ENV !== 'production';
 const nodeEnv = devBuild ? 'development' : 'production';
@@ -14,28 +18,26 @@ const config = {
 
   output: {
     filename: 'webpack-bundle.js',
-    path: '../app/assets/webpack',
+    path: pathLib.resolve(__dirname, '../app/assets/webpack'),
   },
 
   resolve: {
     extensions: ['.js', '.jsx'],
-    alias: {
-      react: path.resolve('./node_modules/react'),
-      'react-dom': path.resolve('./node_modules/react-dom'),
-    },
   },
   plugins: [
-    new webpack.DefinePlugin({
-      'process.env': {
-        NODE_ENV: JSON.stringify(nodeEnv),
-      },
-    }),
+    new webpack.EnvironmentPlugin({ NODE_ENV: nodeEnv }),
   ],
   module: {
     rules: [
       {
         test: require.resolve('react'),
-        use: 'imports-loader?shim=es5-shim/es5-shim&sham=es5-shim/es5-sham',
+        use: {
+          loader: 'imports-loader',
+          options: {
+            shim: 'es5-shim/es5-shim',
+            sham: 'es5-shim/es5-sham',
+          }
+        },
       },
       {
         test: /\.jsx?$/,
@@ -56,8 +58,5 @@ if (devBuild) {
   console.log('Webpack dev build for Rails'); // eslint-disable-line no-console
   module.exports.devtool = 'eval-source-map';
 } else {
-  config.plugins.push(
-    new webpack.optimize.DedupePlugin()
-  );
   console.log('Webpack production build for Rails'); // eslint-disable-line no-console
 }

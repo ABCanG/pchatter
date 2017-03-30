@@ -29,42 +29,43 @@ gem 'jbuilder', '~> 2.5'
 # Use Capistrano for deployment
 # gem 'capistrano-rails', group: :development
 
-gem 'react_on_rails'
-gem 'figaro'
-gem 'devise'
-gem 'omniauth-twitter'
 gem 'acts_as_hashids'
-gem 'simple_form'
 gem 'bootstrap-sass'
+gem 'devise'
+gem 'figaro'
 gem 'mysql2'
+gem 'omniauth-twitter'
+gem 'react_on_rails'
+gem 'redis-objects'
+gem 'simple_form'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug', platform: :mri
-  gem 'pry-rails'
   gem 'pry-byebug'
+  gem 'pry-rails'
 
-  gem 'rspec-rails'
-  gem 'factory_girl_rails'
   gem 'database_cleaner'
+  gem 'factory_girl_rails'
+  gem 'rspec-rails'
   gem 'spring-commands-rspec'
 end
 
 group :development do
   # Access an IRB console on exception pages or by using <%= console %> anywhere in the code.
-  gem 'web-console'
   gem 'listen', '~> 3.0.5'
+  gem 'web-console'
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
-  gem 'spring'
-  gem 'spring-watcher-listen', '~> 2.0.0'
-  gem 'rubocop', require: false
   gem 'annotate'
   gem 'bullet'
   gem 'foreman'
+  gem 'rubocop', require: false
+  gem 'spring'
+  gem 'spring-watcher-listen', '~> 2.0.0'
   gem 'stackprof'
 end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
-gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
+gem 'tzinfo-data', platforms: %i(mingw mswin x64_mingw jruby)
 
 gem 'mini_racer', platforms: :ruby

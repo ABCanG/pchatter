@@ -1,0 +1,11 @@
+<%= link_to room_path(room), class: 'thumbnail' do %>
+  <% if room.hidden %>
+    <%= image_tag 'hide.png' %>
+  <% elsif !room.thumbnail_raw_path.exist? %>
+    <%= image_tag 'base_thumbnail.png' %>
+  <% else %>
+    <%= image_tag thumbnail_room_path(room) %>
+  <% end %>
+  <div class="room-name">ルーム: <%= room.name %></div>
+  <div class="room-count">参加人数: <%= room.entrant.count %></div>
+<% end %>

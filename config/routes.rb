@@ -8,6 +8,10 @@ Rails.application.routes.draw do
   end
   root 'home#index'
 
-  resources :rooms
+  resources :rooms do
+    member do
+      get :thumbnail, action: :thumbnail, format: false
+    end
+  end
   resources :users, param: :screen_name, only: [:show, :index]
 end

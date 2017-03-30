@@ -10,6 +10,7 @@
   "author": "ABCanG <abcang1015@gmail.com> (https://abcang.net/)",
   "license": "MIT",
   "dependencies": {
+    "canvas": "~1.6.5",
     "cookie": "~0.3.1",
     "get-in": "~3.0.1",
     "ioredis": "^2.4.3",
