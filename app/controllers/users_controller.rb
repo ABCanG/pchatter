@@ -1,12 +1,6 @@
 class UsersController < ApplicationController
   before_action :set_user, only: [:show]
 
-  # GET /users
-  # GET /users.json
-  def index
-    @users = User.all
-  end
-
   # GET /users/screen_name
   # GET /users/screen_name.json
   def show

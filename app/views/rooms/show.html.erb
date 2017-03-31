@@ -1,9 +1,22 @@
-<%= react_component("ChatApp", props: {
-	id: @room.id,
-  name: @room.name,
-	pass: @room.pass.present?,
-	hidden: @room.hidden,
-  owner: @room.user == current_user,
-  edit: edit_room_path(@room),
-	currentUserId: current_user&.id
-}, prerender: false) %>
+<% provide(:title, @room.name) %>
+
+<%= content_for :outer_container do %>
+  <div class="chatroom-wrapper">
+    <%= react_component("ChatApp", props: {
+      id: @room.id,
+      name: @room.name,
+      pass: @room.pass.present?,
+      hidden: @room.hidden,
+      currentUserId: current_user&.id
+    }, prerender: false) %>
+  </div>
+<% end %>
+
+<div class="page-header">
+  <h2 class="room-name">
+    <span>ルーム: <%= @room.name %></span>
+    <% if @room.user == current_user %>
+      <%= link_to 'ルームを編集', edit_room_path(@room), class: 'pull-right btn btn-sm btn-default' %>
+    <% end %>
+  </h2>
+</div>

@@ -4,7 +4,7 @@
   <%= f.input :hidden %>
 
   <%= f.button :submit, class: 'btn btn-primary' %>
-  <%= link_to '戻る', room.persisted? ? room_path(room) : rooms_path, class: 'btn btn-default' %>
+  <%= link_to '戻る', room.persisted? ? room_path(room) : root_path, class: 'btn btn-default' %>
   <% if room.persisted? && current_user == room.user %>
     <%= link_to '削除', room, method: :delete, data: { confirm: '本当に削除しますか？' }, class: 'btn btn-danger' %>
   <% end %>

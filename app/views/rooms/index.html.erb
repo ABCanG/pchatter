@@ -1,4 +1,8 @@
-<h1>ルーム一覧</h1>
+<% provide(:title, 'ルーム一覧') %>
+
+<div class="page-header">
+  <h2>ルーム一覧</h2>
+</div>
 <div class="room-list row">
   <% @rooms.each do |room| %>
     <div class="col-xs-6 col-sm-4 col-md-3">

@@ -1,2 +1,16 @@
+<% provide(:title, @user.name) %>
 
-<%= link_to 'Back', users_path %>
+<div class="page-header">
+  <h2>
+    <%= image_tag @user.icon_url %>
+    <%= @user.name%>
+    (<%= link_to "@#{@user.screen_name}", "https://twitter.com/#{@user.screen_name}", tagrget: '_blank' %>)
+  </h2>
+</div>
+<div class="room-list row">
+  <% @user.rooms.each do |room| %>
+    <div class="col-xs-6 col-sm-4 col-md-3">
+      <%= render 'rooms/room', room: room %>
+    </div>
+  <% end %>
+</div>

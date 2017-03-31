@@ -1,5 +1,5 @@
 class RoomsController < ApplicationController
-  before_action :authenticate_user!, except: [:index, :show]
+  before_action :authenticate_user!, except: [:index, :show, :thumbnail]
   before_action :set_room, only: [:show, :edit, :update, :destroy, :thumbnail]
   before_action :check_owner, only: [:edit, :update, :destroy]
 
@@ -30,7 +30,7 @@ class RoomsController < ApplicationController
 
     respond_to do |format|
       if @room.save
-        format.html { redirect_to @room }
+        format.html { redirect_to @room, notice: 'ルームを作成しました' }
         format.json { render :show, status: :created, location: @room }
       else
         format.html { render :new }
@@ -44,7 +44,7 @@ class RoomsController < ApplicationController
   def update
     respond_to do |format|
       if @room.update(room_params)
-        format.html { redirect_to @room }
+        format.html { redirect_to @room, notice: 'ルームを更新しました' }
         format.json { render :show, status: :ok, location: @room }
       else
         format.html { render :edit }
@@ -58,7 +58,7 @@ class RoomsController < ApplicationController
   def destroy
     @room.destroy
     respond_to do |format|
-      format.html { redirect_to rooms_url }
+      format.html { redirect_to root_url, notice: 'ルームを削除しました' }
       format.json { head :no_content }
     end
   end
