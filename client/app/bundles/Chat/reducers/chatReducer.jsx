@@ -35,7 +35,10 @@ export default function chatReducer($$state = $$initialState, action) {
     }
 
     case actionTypes.FAILURE_CONNECT_CHAT: {
-      return $$state.set('connect', false);
+      return $$state.withMutations((s) => (
+        s.set('join', false)
+          .set('connect', false)
+      ));
     }
 
     case actionTypes.ADD_CHAT_LOG: {

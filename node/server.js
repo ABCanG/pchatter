@@ -7,6 +7,7 @@ const Redis = require('ioredis');
 
 const knex = require('./util/knex');
 const { sessionDecoder } = require('./util/session');
+const { makeThumbnail } = require('./util/canvas');
 
 const redisOption = {
   host: process.env.REDIS_HOST,
@@ -57,7 +58,6 @@ function parseUsers(users) {
 }
 
 async function sendInitData(socket, room) {
-  socket.join(room.id);
   const logs = (await redis.hvals(`room:${room.id}:logs`)).map((log) => JSON.parse(log));
   const paths = (await redis.hvals(`room:${room.id}:paths`)).map((path) => JSON.parse(path));
   const users = parseUsers(await redis.hvals(`room:${room.id}:users`));
@@ -67,6 +67,8 @@ async function sendInitData(socket, room) {
     users,
   });
 }
+
+const intervalIds = new Map();
 
 const chat = io.of('/chat');
 chat.on('connection', async (socket) => {
@@ -98,7 +100,16 @@ chat.on('connection', async (socket) => {
       return;
     }
 
+    if (await redis.hlen(`room:${room.id}:users`) === 0) {
+      // start setInterval
+      intervalIds.set(room.id, setInterval(async () => {
+        const paths = (await redis.hvals(`room:${room.id}:paths`)).map((path) => JSON.parse(path));
+        makeThumbnail(paths, `${room.id}.png`);
+      }, 60000));
+    }
+
     if (room.hidden) {
+      socket.join(room.id);
       await sendInitData(socket, room);
     }
     socket.emit('join', { status: 'success' });
@@ -141,10 +152,21 @@ chat.on('connection', async (socket) => {
     await redis.hdel(`room:${room.id}:users`, socket.id);
     const users = parseUsers(await redis.hvals(`room:${room.id}:users`));
     chat.to(room.id).emit('users', { users });
+
+    if (await redis.hlen(`room:${room.id}:users`) === 0) {
+      // FIXME: 複数台だとうまく動かない
+      // stop setInterval
+      const intervalId = intervalIds.get(room.id);
+      if (intervalId) {
+        clearInterval(intervalIds.get(room.id));
+        intervalIds.delete(room.id);
+      }
+    }
   });
 
   // 閲覧のみを禁止していない場合はすぐに初期データを配信
   if (!room.hidden) {
+    socket.join(room.id);
     sendInitData(socket, room);
   }
 });
