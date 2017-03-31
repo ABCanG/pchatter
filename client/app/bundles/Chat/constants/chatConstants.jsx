@@ -2,6 +2,7 @@ import mirrorCreator from 'mirror-creator';
 
 const actionTypes = mirrorCreator([
   'REQUEST_CONNECT_CHAT',
+  'REQUEST_DISCONNECT_CHAT',
   'SUCCESS_CONNECT_CHAT',
   'FAILURE_CONNECT_CHAT',
 

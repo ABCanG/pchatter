@@ -7,6 +7,12 @@ export function requestConnectChat(id) {
   };
 }
 
+export function requestDisconnectChat() {
+  return {
+    type: actionTypes.REQUEST_DISCONNECT_CHAT,
+  };
+}
+
 export function successConnectChat() {
   return {
     type: actionTypes.SUCCESS_CONNECT_CHAT

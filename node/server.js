@@ -68,8 +68,6 @@ async function sendInitData(socket, room) {
   });
 }
 
-const intervalIds = new Map();
-
 const chat = io.of('/chat');
 chat.on('connection', async (socket) => {
   const room = await getRoomData(socket);
@@ -102,10 +100,14 @@ chat.on('connection', async (socket) => {
 
     if (await redis.hlen(`room:${room.id}:users`) === 0) {
       // start setInterval
-      intervalIds.set(room.id, setInterval(async () => {
+      const intervalId = setInterval(async () => {
         const paths = (await redis.hvals(`room:${room.id}:paths`)).map((path) => JSON.parse(path));
         makeThumbnail(paths, `${room.id}.png`);
-      }, 60000));
+        // 人がいなくなったら解除
+        if (await redis.hlen(`room:${room.id}:users`) === 0) {
+          clearInterval(intervalId);
+        }
+      }, 6000);
     }
 
     if (room.hidden) {
@@ -152,16 +154,6 @@ chat.on('connection', async (socket) => {
     await redis.hdel(`room:${room.id}:users`, socket.id);
     const users = parseUsers(await redis.hvals(`room:${room.id}:users`));
     chat.to(room.id).emit('users', { users });
-
-    if (await redis.hlen(`room:${room.id}:users`) === 0) {
-      // FIXME: 複数台だとうまく動かない
-      // stop setInterval
-      const intervalId = intervalIds.get(room.id);
-      if (intervalId) {
-        clearInterval(intervalIds.get(room.id));
-        intervalIds.delete(room.id);
-      }
-    }
   });
 
   // 閲覧のみを禁止していない場合はすぐに初期データを配信

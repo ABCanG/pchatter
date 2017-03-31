@@ -132,17 +132,22 @@ function* handleSendPath(socket) {
   }
 }
 
-function* handleSocketSaga(socket) {
-  yield fork(handleRequestJoinChat, socket);
-  yield fork(handleSendLogMessage, socket);
-  yield fork(handleSendPath, socket);
-  yield fork(handleSocketEvent, socket);
-}
-
 function* handleRequestConnectChat() {
-  const { payload: { id } } = yield take(chatActionTypes.REQUEST_CONNECT_CHAT);
-  const socket = io.connect(`${socketIoURL}/chat?room=${id}`);
-  yield fork(handleSocketSaga, socket);
+  for (;;) {
+    const { payload: { id } } = yield take(chatActionTypes.REQUEST_CONNECT_CHAT);
+    const socket = io.connect(`${socketIoURL}/chat?room=${id}`);
+    const tasks = [
+      yield fork(handleRequestJoinChat, socket),
+      yield fork(handleSendLogMessage, socket),
+      yield fork(handleSendPath, socket),
+      yield fork(handleSocketEvent, socket),
+    ];
+    yield take(chatActionTypes.REQUEST_DISCONNECT_CHAT);
+    for (const task of tasks) {
+      task.cancel();
+    }
+    socket.disconnect();
+  }
 }
 
 export default function* handleChat() {

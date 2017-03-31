@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import Immutable from 'immutable';
 import { SketchPicker } from 'react-color';
 
-import { requestConnectChat, setRoomInfo, setCurrentUserId } from '../actions/chatActionCreators';
+import { requestConnectChat, requestDisconnectChat, setRoomInfo, setCurrentUserId } from '../actions/chatActionCreators';
 import { setStyleColor } from '../actions/canvasActionCreators';
 import DrawCanvas from './DrawCanvas';
 import PreviewCanvas from './PreviewCanvas';
@@ -44,6 +44,11 @@ class ChatWidget extends React.Component {
     dispatch(setRoomInfo(roomInfo));
     dispatch(requestConnectChat(roomInfo.id));
     dispatch(setCurrentUserId(currentUserId));
+  }
+
+  componentWillUnmount() {
+    const { dispatch } = this.props;
+    dispatch(requestDisconnectChat());
   }
 
   handleChangeColor = (color) => {
