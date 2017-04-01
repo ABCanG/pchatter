@@ -21,6 +21,7 @@ class ChatWidget extends React.Component {
       name: PropTypes.string.isRequired,
       pass: PropTypes.bool.isRequired,
       hidden: PropTypes.bool.isRequired,
+      baseImageUrl: PropTypes.string.isRequired,
     }).isRequired,
     currentUserId: PropTypes.number,
     color: PropTypes.shape({
@@ -90,11 +91,11 @@ class ChatWidget extends React.Component {
 function select(state, ownProps) {
   const $$chatStore = state.$$chatStore;
   const $$canvasStore = state.$$canvasStore;
-  const { currentUserId, id, name, pass, hidden } = ownProps;
+  const { currentUserId, id, name, pass, hidden, baseImageUrl } = ownProps;
 
   return {
     currentUserId,
-    roomInfo: { id, name, pass, hidden },
+    roomInfo: { id, name, pass, hidden, baseImageUrl },
     users: $$chatStore.get('users'),
     logs: $$chatStore.get('logs'),
     join: $$chatStore.get('join'),

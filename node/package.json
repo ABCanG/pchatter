@@ -12,10 +12,13 @@
   "dependencies": {
     "canvas": "~1.6.5",
     "cookie": "~0.3.1",
+    "fs-promise": "~2.0.2",
     "get-in": "~3.0.1",
+    "humps": "~2.0.0",
     "ioredis": "^2.4.3",
     "knex": "~0.12.6",
     "mkdirp-promise": "~5.0.1",
+    "moment": "~2.18.1",
     "mysql": "~2.13.0",
     "rails-session-decoder": "~1.0.3",
     "read-yaml": "~1.0.0",

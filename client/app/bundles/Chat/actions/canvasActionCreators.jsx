@@ -14,6 +14,13 @@ export function setVisibleTempPath(flag) {
   };
 }
 
+export function initCanvas(paths, image = null) {
+  return {
+    type: actionTypes.INIT_CANVAS,
+    payload: { paths, image }
+  };
+}
+
 export function addPathToCanvas(paths) {
   return {
     type: actionTypes.ADD_PATH_TO_CANVAS,
@@ -46,5 +53,12 @@ export function setCanvasInfo(canvas) {
   return {
     type: actionTypes.SET_CANVAS_INFO,
     payload: { canvas }
+  };
+}
+
+export function setBaseImage(image) {
+  return {
+    type: actionTypes.SET_BASE_IMAGE,
+    payload: { image }
   };
 }

@@ -7,7 +7,7 @@ const ChatLogs = (props) => {
     <div className="chat-logs">
       <ul>
         {logs.map((log) =>
-          <li key={log.get('id')}>
+          <li key={log.get('num')}>
             <b>{log.get('userName')}</b>
             <span>: {log.get('message')}</span>
           </li>

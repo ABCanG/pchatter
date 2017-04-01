@@ -42,7 +42,7 @@ export default function chatReducer($$state = $$initialState, action) {
     }
 
     case actionTypes.ADD_CHAT_LOG: {
-      return $$state.update('logs', (logs) => logs.merge(Immutable.fromJS(payload.logs)).sortBy((log) => log.get('id')).reverse());
+      return $$state.update('logs', (logs) => logs.merge(Immutable.fromJS(payload.logs)).sortBy((log) => log.get('num')).reverse());
     }
 
     case actionTypes.SET_USER_LIST: {

@@ -15,7 +15,7 @@ function renderPopoverUserList(users) {
           <ul>
             {users.valueSeq().map((user) =>
               <li key={user.get('id')}>
-                <img src={user.get('icon_url')} alt={user.get('name')} />
+                <img src={user.get('iconUrl')} alt={user.get('name')} />
                 {user.get('name')}
               </li>
             )}

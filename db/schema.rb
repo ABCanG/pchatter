@@ -10,7 +10,20 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170105100743) do
+ActiveRecord::Schema.define(version: 20170401074811) do
+
+  create_table "paths", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin" do |t|
+    t.integer  "num",        null: false
+    t.json     "style"
+    t.json     "data"
+    t.integer  "room_id",    null: false
+    t.integer  "user_id",    null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["room_id", "num"], name: "index_paths_on_room_id_and_num", unique: true, using: :btree
+    t.index ["room_id"], name: "index_paths_on_room_id", using: :btree
+    t.index ["user_id"], name: "index_paths_on_user_id", using: :btree
+  end
 
   create_table "rooms", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin" do |t|
     t.string   "name",                       null: false
@@ -44,5 +57,7 @@ ActiveRecord::Schema.define(version: 20170105100743) do
     t.index ["screen_name_low"], name: "index_users_on_screen_name_low", unique: true, using: :btree
   end
 
+  add_foreign_key "paths", "rooms"
+  add_foreign_key "paths", "users"
   add_foreign_key "rooms", "users"
 end

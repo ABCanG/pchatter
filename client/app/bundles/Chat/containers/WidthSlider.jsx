@@ -39,7 +39,7 @@ class WidthSlider extends React.Component {
   }
 }
 
-function select(state, ownProps) {
+function select(state) {
   const $$canvasStore = state.$$canvasStore;
 
   return {

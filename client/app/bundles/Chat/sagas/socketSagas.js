@@ -9,7 +9,8 @@ import {
   requestJoinChat, successJoinChat, failureJoinChat,
   addChatLog, setUserList, setLogMessage
 } from '../actions/chatActionCreators';
-import { setVisibleTempPath, addPathToCanvas } from '../actions/canvasActionCreators';
+import { setVisibleTempPath, addPathToCanvas, initCanvas } from '../actions/canvasActionCreators';
+import { loadImage } from '../utils';
 
 const socketIoURL = process.env.NODE_ENV === 'production' ? '' : 'http://localhost:4000';
 
@@ -62,9 +63,15 @@ function* handleSocketEvent(socket) {
       }
 
       case 'init': {
-        const { logs, paths, users } = data;
+        const { logs, paths, users, baseImage } = data;
+        if (baseImage) {
+          const baseImageUrl = yield select((state) => state.$$chatStore.getIn(['info', 'baseImageUrl']));
+          const img = yield call(loadImage, `${baseImageUrl}?${new Date().getTime()}`);
+          yield put(initCanvas(paths, img));
+        } else {
+          yield put(initCanvas(paths));
+        }
         yield put(addChatLog(logs));
-        yield put(addPathToCanvas(paths));
         yield put(setUserList(users));
         break;
       }

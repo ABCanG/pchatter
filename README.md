@@ -1,24 +1,41 @@
-# README
+pchatter
+===
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+Twitter連携お絵かきチャットサービス
 
-Things you may want to cover:
+### 環境
+* Ruby 2.3以上
+* Node.js 7.6以上
+  * yarnも必要
+* MySQL 5.7.8以上
+* Redis 3以上
 
-* Ruby version
+## 設定ファイルの編集
+`application.yml.example`をコピーして編集
 
-* System dependencies
+```bash
+$ cp config/application.yml{.example,}
+```
 
-* Configuration
+以下のコマンドの出力結果を`SECRET_KEY_BASE`に設定する
 
-* Database creation
+```
+$ bundle exec rake secret
+```
 
-* Database initialization
+## 開発向けセットアップ
+### インストール
+```bash
+$ bundle install --path vendor/bundle
+$ bundle exec rails db:create
+$ bundle exec rails db:migrate
+$ npm install
+```
 
-* How to run the test suite
+### 実行
 
-* Services (job queues, cache servers, search engines, etc.)
+```bash
+$ npm start
+```
 
-* Deployment instructions
-
-* ...
+Railsのサーバが3000番ポートで、Node.jsのサーバが4000番ポートで起動する

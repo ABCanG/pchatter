@@ -7,7 +7,8 @@
       name: @room.name,
       pass: @room.pass.present?,
       hidden: @room.hidden,
-      currentUserId: current_user&.id
+      currentUserId: current_user&.id,
+      baseImageUrl: base_image_room_path(@room)
     }, prerender: false) %>
   </div>
 <% end %>

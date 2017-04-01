@@ -42,6 +42,7 @@ class OffscreenCanvas extends React.Component {
     canvas: PropTypes.instanceOf(Immutable.Map).isRequired,
     mainCanvas: PropTypes.instanceOf(HTMLElement),
     previewCanvas: PropTypes.instanceOf(HTMLElement),
+    baseImage: PropTypes.instanceOf(HTMLElement),
     setDrawTempPathMethod: PropTypes.func.isRequired,
   };
 
@@ -50,6 +51,7 @@ class OffscreenCanvas extends React.Component {
     height: 2000,
     mainCanvas: null,
     previewCanvas: null,
+    baseImage: null,
   };
 
   constructor(props) {
@@ -75,7 +77,7 @@ class OffscreenCanvas extends React.Component {
   }
 
   shouldComponentUpdate(nextProps) {
-    const { visibleTempPath, canvas, paths } = this.props;
+    const { visibleTempPath, canvas, paths, baseImage } = this.props;
     const isRefreshPreview = visibleTempPath !== nextProps.visibleTempPath;
     const isRefreshMain = !Immutable.is(canvas, nextProps.canvas);
     if (isRefreshPreview || isRefreshMain) {
@@ -89,6 +91,11 @@ class OffscreenCanvas extends React.Component {
         }
       });
       return true;
+    }
+
+    if (baseImage !== nextProps.baseImage) {
+      requestAnimationFrame(this.redraw);
+      return false;
     }
 
     const pathDiff = nextProps.paths.subtract(paths);
@@ -193,10 +200,17 @@ class OffscreenCanvas extends React.Component {
   }
 
   redraw = () => {
-    const { width, height, paths } = this.props;
+    const { width, height, paths, baseImage, previewCanvas } = this.props;
     const rawPaths = paths.toJS();
     this.ctx.main.clearRect(0, 0, width, height);
     this.ctx.previewCache.clearRect(0, 0, width, height);
+    if (baseImage) {
+      this.ctx.main.drawImage(baseImage, 0, 0);
+      const { width: pWidth, height: pHeght } = previewCanvas;
+      const target = this.ctx.main.canvas;
+      const temp = this.ctx.temp.canvas;
+      resizeImage(this.ctx.previewCache.canvas, pWidth, pHeght, target, 0, 0, width, height, temp);
+    }
     this.drawMainAndPreviewCache(rawPaths);
     this.reflectOnPreviewCanvas();
     this.makeOffscreenMainCache();
@@ -218,6 +232,7 @@ function select(state) {
     style: $$canvasStore.get('style').toJS(),
     paths: $$canvasStore.get('paths'),
     canvas: $$canvasStore.get('canvas'),
+    baseImage: $$canvasStore.get('baseImage'),
   };
 }
 

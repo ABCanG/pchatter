@@ -11,6 +11,7 @@ Rails.application.routes.draw do
   resources :rooms, except: [:index] do
     member do
       get :thumbnail, action: :thumbnail, format: false
+      get :base_image, action: :base_image, format: false
     end
   end
   resources :users, param: :screen_name, only: [:show]

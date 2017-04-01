@@ -1,6 +1,6 @@
 class RoomsController < ApplicationController
-  before_action :authenticate_user!, except: [:index, :show, :thumbnail]
-  before_action :set_room, only: [:show, :edit, :update, :destroy, :thumbnail]
+  before_action :authenticate_user!, except: [:index, :show, :thumbnail, :base_image]
+  before_action :set_room, only: [:show, :edit, :update, :destroy, :thumbnail, :base_image]
   before_action :check_owner, only: [:edit, :update, :destroy]
 
   # GET /rooms
@@ -67,6 +67,15 @@ class RoomsController < ApplicationController
     path = @room.thumbnail_raw_path
     if path.exist?
       expires_in 1.minute
+      send_file path, type: 'image/png', disposition: 'inline'
+    else
+      render_not_found
+    end
+  end
+
+  def base_image
+    path = @room.base_image_raw_path
+    if path.exist?
       send_file path, type: 'image/png', disposition: 'inline'
     else
       render_not_found
