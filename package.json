@@ -8,7 +8,7 @@
   "scripts": {
     "postinstall:client": "cd client && yarn install",
     "postinstall:node": "cd node && yarn install",
-    "postinstall": "npm run postinstall:client & npm run postinstall:node",
+    "postinstall": "npm run postinstall:client && npm run postinstall:node",
     "start": "bundle exec foreman start -f Procfile.dev",
     "test": "rspec"
   },
