@@ -8,7 +8,7 @@ Twitter連携お絵かきチャットサービス
 * Node.js 7.6以上
   * yarnも必要
 * MySQL 5.7.8以上
-* Redis 3以上
+* Redis 2以上
 
 ## 設定ファイルの編集
 `application.yml.example`をコピーして編集
