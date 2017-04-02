@@ -38,7 +38,7 @@ async function sendInitData(socket, roomId) {
     logs,
     paths,
     users,
-    baseImage: existsBaseImage(`${roomId}.png`),
+    baseImage: await existsBaseImage(`${roomId}.png`),
   });
 }
 
