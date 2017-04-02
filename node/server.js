@@ -1,12 +1,23 @@
 require('./util/loadenv');
+const pathLib = require('path');
 const io = require('socket.io')(process.env.PORT || 4000);
 const redisAdapter = require('socket.io-redis');
 const Redis = require('ioredis');
 const moment = require('moment');
+const npid = require('npid');
 
 const { getUserIdFromCookie } = require('./util/session');
 const db = require('./util/knex');
 const { existsBaseImage, makeThumbnail, updateBaseImage } = require('./util/canvas');
+
+try {
+  const pidPath = pathLib.join(__dirname, '..', 'tmp', 'pids', 'node.pid');
+  const pid = npid.create(pidPath);
+  pid.removeOnExit();
+} catch (err) {
+  console.log(err);
+  process.exit(1);
+}
 
 const redisOption = {
   host: process.env.REDIS_HOST,

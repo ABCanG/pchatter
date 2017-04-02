@@ -12,7 +12,7 @@ import {
 import { setVisibleTempPath, addPathToCanvas, initCanvas } from '../actions/canvasActionCreators';
 import { loadImage } from '../utils';
 
-const socketIoURL = process.env.NODE_ENV === 'production' ? '' : 'http://localhost:4000';
+const socketIoURL = process.env.NODE_ENV === 'production' ? '/socket' : 'http://localhost:4000';
 
 function subscribeSocket(socket, events) {
   return eventChannel((emit) => {
