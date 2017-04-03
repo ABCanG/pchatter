@@ -31,6 +31,7 @@ async function isJoin(socket, roomId) {
 async function sendInitData(socket, roomId) {
   // TODO: redisになかったらDBから取ってくる
   // 入室者がいない場合は expireをつける
+  const num = await redis.incr(`room:${roomId}:paths:count`);
   const logs = (await redis.hvals(`room:${roomId}:logs`)).map((log) => JSON.parse(log));
   const paths = (await redis.hvals(`room:${roomId}:paths`)).map((path) => JSON.parse(path));
   const users = parseUsers(await redis.hvals(`room:${roomId}:users`));
@@ -38,7 +39,7 @@ async function sendInitData(socket, roomId) {
     logs,
     paths,
     users,
-    baseImage: await existsBaseImage(`${roomId}.png`),
+    baseImageNum: await existsBaseImage(`${roomId}.png`) && Math.floor(num / 100),
   });
 }
 

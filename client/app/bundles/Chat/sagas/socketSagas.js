@@ -63,10 +63,10 @@ function* handleSocketEvent(socket) {
       }
 
       case 'init': {
-        const { logs, paths, users, baseImage } = data;
-        if (baseImage) {
+        const { logs, paths, users, baseImageNum } = data;
+        if (baseImageNum) {
           const baseImageUrl = yield select((state) => state.$$chatStore.getIn(['info', 'baseImageUrl']));
-          const img = yield call(loadImage, `${baseImageUrl}?${new Date().getTime()}`);
+          const img = yield call(loadImage, `${baseImageUrl}?${baseImageNum}`);
           yield put(initCanvas(paths, img));
         } else {
           yield put(initCanvas(paths));

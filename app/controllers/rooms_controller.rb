@@ -67,7 +67,7 @@ class RoomsController < ApplicationController
     path = @room.thumbnail_raw_path
     if path.exist?
       expires_in 1.minute
-      send_file path, type: 'image/png', disposition: 'inline'
+      send_file path, type: 'image/png', disposition: 'inline', filename: 'thumbnail.png'
     else
       render_not_found
     end
@@ -76,7 +76,7 @@ class RoomsController < ApplicationController
   def base_image
     path = @room.base_image_raw_path
     if path.exist?
-      send_file path, type: 'image/png', disposition: 'inline'
+      send_file path, type: 'image/png', disposition: 'inline', filename: 'base_image.png'
     else
       render_not_found
     end

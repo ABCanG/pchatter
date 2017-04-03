@@ -10,8 +10,8 @@ Rails.application.routes.draw do
 
   resources :rooms, except: [:index] do
     member do
-      get :thumbnail, action: :thumbnail, format: false
-      get :base_image, action: :base_image, format: false
+      get 'thumbnail.png', action: :thumbnail, format: false, defaults: { format: 'png' }, as: :thumbnail
+      get 'base_image.png', action: :base_image, format: false, defaults: { format: 'png' }, as: :base_image
     end
   end
   resources :users, param: :screen_name, only: [:show]
