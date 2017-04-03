@@ -30,13 +30,14 @@ class User < ApplicationRecord
   has_many :rooms
 
   def self.from_omniauth(auth)
-    where(provider: auth.provider, uid: auth.uid).first_or_create do |user|
+    where(provider: auth.provider, uid: auth.uid).first_or_initialize.tap do |user|
       user.name = auth.info.name
       user.screen_name = auth.info.nickname
       user.screen_name_low = auth.info.nickname.downcase
       user.icon_url = auth.info.image
       user.token = auth.credentials.token
       user.secret = auth.credentials.secret
+      user.save
     end
   end
 
