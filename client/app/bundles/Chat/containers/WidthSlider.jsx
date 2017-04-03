@@ -27,6 +27,7 @@ class WidthSlider extends React.Component {
           value={width}
           min={1}
           max={200}
+          mobile={false}
           onChange={this.handleChangeWidth}
           />
         <RcSlider
