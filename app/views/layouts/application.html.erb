@@ -43,5 +43,6 @@
       <%= yield %>
     </div>
     <%= yield :outer_container %>
+    <%= analytics_init if Rails.env.production? %>
   </body>
 </html>
