@@ -1,0 +1,15 @@
+version: '2'
+services:
+  db:
+    restart: always
+    image: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+    ports:
+      - "3306:3306"
+
+  redis:
+    restart: always
+    image: redis:alpine
+    ports:
+      - "6379:6379"
