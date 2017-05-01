@@ -12,5 +12,6 @@
     "start": "bundle exec foreman start -f Procfile.dev",
     "test": "rspec"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "devDependencies": {}
 }

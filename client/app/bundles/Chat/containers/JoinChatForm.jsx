@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React from 'react';
 import { Button, Form, FormGroup, FormControl, HelpBlock } from 'react-bootstrap';
 import { connect } from 'react-redux';
 import Immutable from 'immutable';

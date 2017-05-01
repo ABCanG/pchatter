@@ -9,7 +9,6 @@ Twitter連携お絵かきチャットサービス
   * yarnも必要
   * [node-canvas](https://github.com/Automattic/node-canvas)の依存パッケージ
 * MySQL 5.7.8以上
-* sqlite3
 * Redis 2以上
 
 ## 設定ファイルの編集
