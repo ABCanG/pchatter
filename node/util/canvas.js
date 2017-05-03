@@ -71,14 +71,15 @@ async function makeThumbnail(paths, filename) {
   for (const ctx of [tempCtx, tempCtx2, thumbnailCtx]) {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   }
+  tempCtx2.globalCompositeOperation = 'source-over';
+  const image = await loadImage(await getBaseImagePath(filename));
+  if (image) {
+    tempCtx2.drawImage(image, 0, 0);
+  }
   drawPaths(paths, tempCtx2, tempCtx);
   tempCtx.globalCompositeOperation = 'source-over';
   tempCtx.fillStyle = 'white';
   tempCtx.fillRect(0, 0, tempWidth, tempHeight);
-  const image = await loadImage(await getBaseImagePath(filename));
-  if (image) {
-    tempCtx.drawImage(image, 0, 0);
-  }
   tempCtx.drawImage(tempCanvas2, 0, 0);
   tempCtx2.globalCompositeOperation = 'source-over';
   resizeImage(thumbnailCanvas, thumbnailWidth, thumbnailHeight,
