@@ -63,7 +63,6 @@ async function loadImage(filepath) {
     return image;
   } catch (e) {
     // base file not found
-    console.error(e);
   }
   return null;
 }

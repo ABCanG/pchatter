@@ -58,7 +58,7 @@ class OffscreenCanvas extends React.Component {
   constructor(props) {
     super(props);
     const { width, height } = props;
-    const offscrenNames = ['temp', 'main', 'my', 'previewCache', 'mainCache'];
+    const offscrenNames = ['temp', 'original', 'my', 'previewCache', 'mainCache'];
 
     this.tempPath = [];
 
@@ -130,7 +130,6 @@ class OffscreenCanvas extends React.Component {
     if (tempPath.length > 0) {
       setCtxStyle(this.ctx.my, style);
       drawPathData(this.ctx.my, tempPath);
-      this.reflectOnPreviewCanvas();
       this.reflectOnMainCanvas();
     } else {
       this.ctx.my.clearRect(0, 0, width, height);
@@ -143,19 +142,19 @@ class OffscreenCanvas extends React.Component {
       const { width: mainWidth, height: mainHeght } = mainCanvas;
       const { sx, sy, sw, sh } = getMainCanvasTrimInfo(canvas, mainCanvas);
       const cacheCanvas = this.ctx.mainCache.canvas;
-      const target = this.ctx.main.canvas;
-      resizeImage(cacheCanvas, mainWidth, mainHeght, target, sx, sy, sw, sh);
+      const src = this.ctx.original.canvas;
+      resizeImage(cacheCanvas, mainWidth, mainHeght, src, sx, sy, sw, sh);
     }
   }
 
   drawMainAndPreviewCache(paths) {
     const tempCtx = this.ctx.temp;
-    drawPaths(paths, this.ctx.main, tempCtx);
+    drawPaths(paths, this.ctx.original, tempCtx);
     drawPaths(paths, this.ctx.previewCache, tempCtx, 0.1);
   }
 
   reflectOnPreviewCanvas() {
-    const { style, previewCanvas, visibleTempPath } = this.props;
+    const { previewCanvas } = this.props;
     if (!previewCanvas) {
       return;
     }
@@ -168,13 +167,6 @@ class OffscreenCanvas extends React.Component {
     ctx.globalCompositeOperation = typeToCompositeOperation();
     ctx.fillRect(0, 0, pWidth, pHeght);
     ctx.drawImage(cacheCanvas, 0, 0, pWidth, pHeght, 0, 0, pWidth, pHeght);
-
-    // 自分の引いた線を反映
-    if (visibleTempPath) {
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      drawPaths([{ style, data: this.tempPath }], ctx, this.ctx.temp, 0.1);
-    }
   }
 
   reflectOnMainCanvas() {
@@ -191,11 +183,11 @@ class OffscreenCanvas extends React.Component {
       // 自分の引いた線を反映
       if (visibleTempPath) {
         const { sx, sy, sw, sh } = getMainCanvasTrimInfo(canvas, mainCanvas);
-        const target = this.ctx.my.canvas;
+        const src = this.ctx.my.canvas;
         const temp = this.ctx.temp.canvas;
         ctx.globalCompositeOperation = typeToCompositeOperation(style.type);
         // TODO resizeImageを使わないように
-        resizeImage(mainCanvas, mainWidth, mainHeght, target, sx, sy, sw, sh, temp);
+        resizeImage(mainCanvas, mainWidth, mainHeght, src, sx, sy, sw, sh, temp);
       }
     }
   }
@@ -203,14 +195,14 @@ class OffscreenCanvas extends React.Component {
   redraw = () => {
     const { width, height, paths, baseImage, previewCanvas } = this.props;
     const rawPaths = paths.toJS();
-    this.ctx.main.clearRect(0, 0, width, height);
+    this.ctx.original.clearRect(0, 0, width, height);
     this.ctx.previewCache.clearRect(0, 0, width, height);
     if (baseImage) {
-      this.ctx.main.drawImage(baseImage, 0, 0);
+      this.ctx.original.drawImage(baseImage, 0, 0);
       const { width: pWidth, height: pHeght } = previewCanvas;
-      const target = this.ctx.main.canvas;
+      const src = this.ctx.original.canvas;
       const temp = this.ctx.temp.canvas;
-      resizeImage(this.ctx.previewCache.canvas, pWidth, pHeght, target, 0, 0, width, height, temp);
+      resizeImage(this.ctx.previewCache.canvas, pWidth, pHeght, src, 0, 0, width, height, temp);
     }
     this.drawMainAndPreviewCache(rawPaths);
     this.reflectOnPreviewCanvas();
