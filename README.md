@@ -40,3 +40,7 @@ $ npm start
 ```
 
 Railsのサーバが3000番ポートで、Node.jsのサーバが4000番ポートで起動する
+
+### docker-compose
+* MySQLとredisが起動する
+* `docker-compose up -d`
