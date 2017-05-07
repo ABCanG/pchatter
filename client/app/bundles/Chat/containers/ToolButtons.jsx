@@ -16,6 +16,11 @@ function convertNewCanvasInfo(canvasInfo, diff) {
   };
 }
 
+function disableDrag(e) {
+  e.preventDefault();
+}
+
+
 class ChatWidget extends React.Component {
   static propTypes = {
     type: PropTypes.string.isRequired,
@@ -54,20 +59,20 @@ class ChatWidget extends React.Component {
 
     return (
       <div className="tool-buttons">
-        {join && <Button onClick={this.handleClickPencil} className={type === 'pencil' ? 'active' : null}>
-          <img src="/assets/pencil.png" alt="pencil" />
+        {join && <Button onMouseDown={this.handleClickPencil} className={type === 'pencil' ? 'active' : null}>
+          <img src="/assets/pencil.png" alt="pencil" onDragStart={disableDrag} />
         </Button>}
-        {join && <Button onClick={this.handleClickEraser} className={type === 'eraser' ? 'active' : null}>
-          <img src="/assets/eraser.png" alt="eraser" />
+        {join && <Button onMouseDown={this.handleClickEraser} className={type === 'eraser' ? 'active' : null}>
+          <img src="/assets/eraser.png" alt="eraser" onDragStart={disableDrag} />
         </Button>}
-        {false/* TODO */ && <Button onClick={this.handleClickColorPicker} className={type === 'color-picker' ? 'active' : null}>
-          <img src="/assets/color-picker.png" alt="color picker" />
+        {false/* TODO */ && <Button onMouseDown={this.handleClickColorPicker} className={type === 'color-picker' ? 'active' : null}>
+          <img src="/assets/color-picker.png" alt="color picker" onDragStart={disableDrag} />
         </Button>}
-        <Button onClick={this.handleClickZoomIn}>
-          <img src="/assets/zoom-in.png" alt="zoom in" />
+        <Button onMouseDown={this.handleClickZoomIn}>
+          <img src="/assets/zoom-in.png" alt="zoom in" onDragStart={disableDrag} />
         </Button>
-        <Button onClick={this.handleClickZoomOut}>
-          <img src="/assets/zoom-out.png" alt="zoom out" />
+        <Button onMouseDown={this.handleClickZoomOut}>
+          <img src="/assets/zoom-out.png" alt="zoom out" onDragStart={disableDrag} />
         </Button>
       </div>
     );
