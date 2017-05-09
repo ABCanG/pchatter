@@ -2,13 +2,13 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { Button, Form, FormGroup, FormControl, HelpBlock } from 'react-bootstrap';
 import { connect } from 'react-redux';
-import Immutable from 'immutable';
+import ImmutablePropTypes from 'react-immutable-proptypes';
 
 import { requestJoinChat, setRoomPass } from '../actions/chatActionCreators';
 
 class JoinChatForm extends React.Component {
   static propTypes = {
-    info: PropTypes.instanceOf(Immutable.Map).isRequired,
+    info: ImmutablePropTypes.map.isRequired,
     pass: PropTypes.string.isRequired,
     joinFailureMessage: PropTypes.string.isRequired,
     dispatch: PropTypes.func.isRequired,

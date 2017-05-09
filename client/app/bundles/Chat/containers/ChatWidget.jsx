@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { connect } from 'react-redux';
-import Immutable from 'immutable';
+import ImmutablePropTypes from 'react-immutable-proptypes';
 import { SketchPicker } from 'react-color';
 
 import { requestConnectChat, requestDisconnectChat, setRoomInfo, setCurrentUserId } from '../actions/chatActionCreators';
@@ -31,8 +31,8 @@ class ChatWidget extends React.Component {
       b: PropTypes.number.isRequired,
       a: PropTypes.number.isRequired,
     }).isRequired,
-    users: PropTypes.instanceOf(Immutable.Map).isRequired,
-    logs: PropTypes.instanceOf(Immutable.Set).isRequired,
+    users: ImmutablePropTypes.map.isRequired,
+    logs: ImmutablePropTypes.set.isRequired,
     join: PropTypes.bool.isRequired,
     dispatch: PropTypes.func.isRequired,
   };

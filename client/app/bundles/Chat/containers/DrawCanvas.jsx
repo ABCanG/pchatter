@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { connect } from 'react-redux';
-import Immutable from 'immutable';
+import ImmutablePropTypes from 'react-immutable-proptypes';
 import EventListener from 'react-event-listener';
 
 import { setVisibleTempPath, sendTempPath, setCanvasInfo } from '../actions/canvasActionCreators';
@@ -12,8 +12,8 @@ class DrawCanvas extends React.Component {
   static propTypes = {
     join: PropTypes.bool.isRequired,
     previewCanvas: PropTypes.instanceOf(HTMLElement),
-    style: PropTypes.instanceOf(Immutable.Map).isRequired,
-    canvas: PropTypes.instanceOf(Immutable.Map).isRequired,
+    style: ImmutablePropTypes.map.isRequired,
+    canvas: ImmutablePropTypes.map.isRequired,
     dispatch: PropTypes.func.isRequired,
   };
 

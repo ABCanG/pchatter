@@ -1,8 +1,6 @@
-import PropTypes from 'prop-types';
 import React from 'react';
 import { Popover, OverlayTrigger } from 'react-bootstrap';
-import Immutable from 'immutable';
-
+import ImmutablePropTypes from 'react-immutable-proptypes';
 
 function renderPopoverUserList(users) {
   return (
@@ -39,7 +37,7 @@ const UserList = (props) => {
 };
 
 UserList.propTypes = {
-  users: PropTypes.instanceOf(Immutable.Map).isRequired,
+  users: ImmutablePropTypes.map.isRequired,
 };
 
 export default UserList;

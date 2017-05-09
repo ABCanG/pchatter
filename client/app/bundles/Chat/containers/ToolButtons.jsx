@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { Button } from 'react-bootstrap';
 import { connect } from 'react-redux';
-import Immutable from 'immutable';
+import ImmutablePropTypes from 'react-immutable-proptypes';
 
 import { setStyleType, setCanvasInfo } from '../actions/canvasActionCreators';
 
@@ -24,7 +24,7 @@ function disableDrag(e) {
 class ChatWidget extends React.Component {
   static propTypes = {
     type: PropTypes.string.isRequired,
-    canvas: PropTypes.instanceOf(Immutable.Map).isRequired,
+    canvas: ImmutablePropTypes.map.isRequired,
     join: PropTypes.bool.isRequired,
     dispatch: PropTypes.func.isRequired,
   };

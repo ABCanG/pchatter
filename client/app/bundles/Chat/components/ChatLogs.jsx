@@ -1,6 +1,5 @@
-import PropTypes from 'prop-types';
 import React from 'react';
-import Immutable from 'immutable';
+import ImmutablePropTypes from 'react-immutable-proptypes';
 
 const ChatLogs = (props) => {
   const { logs } = props;
@@ -19,7 +18,7 @@ const ChatLogs = (props) => {
 };
 
 ChatLogs.propTypes = {
-  logs: PropTypes.instanceOf(Immutable.Set).isRequired,
+  logs: ImmutablePropTypes.set.isRequired,
 };
 
 export default ChatLogs;

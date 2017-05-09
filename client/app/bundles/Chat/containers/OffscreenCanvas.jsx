@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { connect } from 'react-redux';
-import Immutable from 'immutable';
+import ImmutablePropTypes from 'react-immutable-proptypes';
 
 import {
   setCtxStyle,
@@ -29,7 +29,7 @@ class OffscreenCanvas extends React.Component {
     visibleTempPath: PropTypes.bool.isRequired,
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
-    paths: PropTypes.instanceOf(Immutable.Set).isRequired,
+    paths: ImmutablePropTypes.set.isRequired,
     style: PropTypes.shape({
       color: PropTypes.shape({
         r: PropTypes.number.isRequired,
@@ -40,7 +40,7 @@ class OffscreenCanvas extends React.Component {
       width: PropTypes.number.isRequired,
       type: PropTypes.string.isRequired,
     }).isRequired,
-    canvas: PropTypes.instanceOf(Immutable.Map).isRequired,
+    canvas: ImmutablePropTypes.map.isRequired,
     mainCanvas: PropTypes.instanceOf(HTMLElement),
     previewCanvas: PropTypes.instanceOf(HTMLElement),
     baseImage: PropTypes.instanceOf(HTMLElement),

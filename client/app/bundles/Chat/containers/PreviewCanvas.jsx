@@ -1,14 +1,14 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { connect } from 'react-redux';
-import Immutable from 'immutable';
+import ImmutablePropTypes from 'react-immutable-proptypes';
 
 import { setCanvasInfo } from '../actions/canvasActionCreators';
 import { getMousePosition } from '../utils';
 
 class PreviewCanvas extends React.Component {
   static propTypes = {
-    canvas: PropTypes.instanceOf(Immutable.Map).isRequired,
+    canvas: ImmutablePropTypes.map.isRequired,
     refPreviewCanvas: PropTypes.func.isRequired,
     dispatch: PropTypes.func.isRequired,
   };
