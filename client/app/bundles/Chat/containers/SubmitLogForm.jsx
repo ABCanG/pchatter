@@ -38,7 +38,7 @@ class SubmitLogForm extends React.Component {
   }
 }
 
-function select(state) {
+function mapStateToProps(state) {
   const $$chatStore = state.$$chatStore;
 
   return {
@@ -46,4 +46,4 @@ function select(state) {
   };
 }
 
-export default connect(select)(SubmitLogForm);
+export default connect(mapStateToProps)(SubmitLogForm);

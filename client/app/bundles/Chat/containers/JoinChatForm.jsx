@@ -46,7 +46,7 @@ class JoinChatForm extends React.Component {
   }
 }
 
-function select(state) {
+function mapStateToProps(state) {
   const $$chatStore = state.$$chatStore;
 
   return {
@@ -56,4 +56,4 @@ function select(state) {
   };
 }
 
-export default connect(select)(JoinChatForm);
+export default connect(mapStateToProps)(JoinChatForm);

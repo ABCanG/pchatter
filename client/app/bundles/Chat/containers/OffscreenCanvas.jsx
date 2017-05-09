@@ -217,7 +217,7 @@ class OffscreenCanvas extends React.Component {
   }
 }
 
-function select(state) {
+function mapStateToProps(state) {
   const $$canvasStore = state.$$canvasStore;
 
   return {
@@ -229,4 +229,4 @@ function select(state) {
   };
 }
 
-export default connect(select)(OffscreenCanvas);
+export default connect(mapStateToProps)(OffscreenCanvas);

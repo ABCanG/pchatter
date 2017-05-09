@@ -194,7 +194,7 @@ class DrawCanvas extends React.Component {
   }
 }
 
-function select(state) {
+function mapStateToProps(state) {
   const $$chatStore = state.$$chatStore;
   const $$canvasStore = state.$$canvasStore;
 
@@ -205,4 +205,4 @@ function select(state) {
   };
 }
 
-export default connect(select)(DrawCanvas);
+export default connect(mapStateToProps)(DrawCanvas);

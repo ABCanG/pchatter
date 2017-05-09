@@ -42,7 +42,7 @@ class WidthSlider extends React.Component {
   }
 }
 
-function select(state) {
+function mapStateToProps(state) {
   const $$canvasStore = state.$$canvasStore;
 
   return {
@@ -50,4 +50,4 @@ function select(state) {
   };
 }
 
-export default connect(select)(WidthSlider);
+export default connect(mapStateToProps)(WidthSlider);

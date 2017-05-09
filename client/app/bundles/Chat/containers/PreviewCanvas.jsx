@@ -91,7 +91,7 @@ class PreviewCanvas extends React.Component {
   }
 }
 
-function select(state) {
+function mapStateToProps(state) {
   const $$canvasStore = state.$$canvasStore;
 
   return {
@@ -99,4 +99,4 @@ function select(state) {
   };
 }
 
-export default connect(select)(PreviewCanvas);
+export default connect(mapStateToProps)(PreviewCanvas);

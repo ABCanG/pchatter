@@ -79,7 +79,7 @@ class ChatWidget extends React.Component {
   }
 }
 
-function select(state) {
+function mapStateToProps(state) {
   const $$chatStore = state.$$chatStore;
   const $$canvasStore = state.$$canvasStore;
 
@@ -90,4 +90,4 @@ function select(state) {
   };
 }
 
-export default connect(select)(ChatWidget);
+export default connect(mapStateToProps)(ChatWidget);
