@@ -26,6 +26,16 @@ const config = {
   },
   plugins: [
     new webpack.EnvironmentPlugin({ NODE_ENV: nodeEnv }),
+    ...(devBuild ? [] : [
+      new webpack.optimize.DedupePlugin(),
+      new webpack.optimize.UglifyJsPlugin({
+        compress: {
+          warnings: false,
+          drop_console: true
+        },
+      }),
+      new webpack.optimize.AggressiveMergingPlugin(),
+    ]),
   ],
   module: {
     rules: [
