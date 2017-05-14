@@ -45,7 +45,7 @@ class OffscreenCanvas extends React.Component {
     mainCanvas: PropTypes.instanceOf(HTMLElement),
     previewCanvas: PropTypes.instanceOf(HTMLElement),
     baseImage: PropTypes.instanceOf(HTMLElement),
-    setDrawTempPathMethod: PropTypes.func.isRequired,
+    exportFunction: PropTypes.func.isRequired,
   };
 
   static defaultProps = {
@@ -68,13 +68,16 @@ class OffscreenCanvas extends React.Component {
       return ctx;
     }, {});
 
+    this.ctx.colorPicker = createCtx(1, 1);
+
     this.ctx.temp.globalCompositeOperation = 'copy';
     this.ctx.my.globalCompositeOperation = 'copy';
     this.ctx.mainCache.globalCompositeOperation = 'copy';
   }
 
   componentDidMount() {
-    this.props.setDrawTempPathMethod(this.drawTempPath);
+    const { getCanvasColor, drawTempPath } = this;
+    this.props.exportFunction({ getCanvasColor, drawTempPath });
     requestAnimationFrame(this.redraw);
   }
 
@@ -120,6 +123,18 @@ class OffscreenCanvas extends React.Component {
     }
 
     return false;
+  }
+
+  // 親から呼ばれる
+  getCanvasColor = (pos) => {
+    const ctx = this.ctx.colorPicker;
+    const { x, y } = pos;
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, 1, 1);
+    ctx.drawImage(this.ctx.original.canvas, x, y, 1, 1, 0, 0, 1, 1);
+
+    const {data: [r, g, b, a]} = ctx.getImageData(0, 0, 1, 1);
+    return { r, g, b, a: a / 255 };
   }
 
   // 親から呼ばれる
@@ -177,8 +192,7 @@ class OffscreenCanvas extends React.Component {
       const { width: mainWidth, height: mainHeght } = mainCanvas;
       const cacheCanvas = this.ctx.mainCache.canvas;
 
-      ctx.clearRect(0, 0, mainWidth, mainHeght);
-      ctx.globalCompositeOperation = typeToCompositeOperation();
+      ctx.globalCompositeOperation = 'copy';
       ctx.drawImage(cacheCanvas, 0, 0, mainWidth, mainHeght, 0, 0, mainWidth, mainHeght);
 
       // 自分の引いた線を反映

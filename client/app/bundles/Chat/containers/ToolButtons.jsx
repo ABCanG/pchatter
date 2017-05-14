@@ -65,7 +65,7 @@ class ChatWidget extends React.Component {
         {join && <Button onMouseDown={this.handleClickEraser} className={type === 'eraser' ? 'active' : null}>
           <img src="/assets/eraser.png" alt="eraser" onDragStart={disableDrag} />
         </Button>}
-        {false/* TODO */ && <Button onMouseDown={this.handleClickColorPicker} className={type === 'color-picker' ? 'active' : null}>
+        {join && <Button onMouseDown={this.handleClickColorPicker} className={type === 'color-picker' ? 'active' : null}>
           <img src="/assets/color-picker.png" alt="color picker" onDragStart={disableDrag} />
         </Button>}
         <Button onMouseDown={this.handleClickZoomIn}>

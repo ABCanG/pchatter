@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import ImmutablePropTypes from 'react-immutable-proptypes';
 import EventListener from 'react-event-listener';
 
-import { setVisibleTempPath, sendTempPath, setCanvasInfo } from '../actions/canvasActionCreators';
+import { setVisibleTempPath, sendTempPath, setCanvasInfo, setStyleColor } from '../actions/canvasActionCreators';
 import OffscreenCanvas from './OffscreenCanvas';
 import { getMousePosition } from '../utils';
 
@@ -26,6 +26,8 @@ class DrawCanvas extends React.Component {
     this.isMouseDown = false;
     this.lastRequestAnimationFrameId = null;
     this.tempPath = [];
+    this.altKey = false;
+    this.lastPos = null;
   }
 
   componentDidMount() {
@@ -44,6 +46,7 @@ class DrawCanvas extends React.Component {
       const canvas = this.mouseCircleCtx.canvas;
       canvas.width = width;
       canvas.height = height;
+      this.mouseCircleCtx.globalCompositeOperation = 'copy';
     }
 
     if (this.mainCanvas) {
@@ -58,16 +61,21 @@ class DrawCanvas extends React.Component {
   }
 
   handleMouseDown = (e) => {
-    const { dispatch, join, canvas } = this.props;
+    const { dispatch, join, canvas, style } = this.props;
     if (!join) {
       return;
     }
 
+    const { scale, left, top } = canvas.toJS();
+    const pos = getMousePosition(e, { scale, left, top });
+
     // e.button 0: 左 1: 中 2: 右
-    if (!this.isMouseDown) {
+    if (this.altKey || style.get('type') === 'color-picker') {
+      const color = this.getCanvasColor(pos.transformed);
+      dispatch(setStyleColor(color));
+    } else if (!this.isMouseDown) {
       this.isMouseDown = true;
-      const { scale, left, top } = canvas.toJS();
-      this.tempPath = [getMousePosition(e, { scale, left, top }).transformed];
+      this.tempPath = [pos.transformed];
       this.drawTempPath(this.tempPath);
       dispatch(setVisibleTempPath(true));
     }
@@ -84,7 +92,8 @@ class DrawCanvas extends React.Component {
 
     const { scale, left, top } = canvas.toJS();
     const pos = getMousePosition(e, { scale, left, top });
-    this.drawMousePosition(pos.original);
+    this.lastPos = pos;
+    this.drawMousePosition(pos);
 
     if (this.isMouseDown) {
       this.tempPath.push(pos.transformed);
@@ -107,6 +116,27 @@ class DrawCanvas extends React.Component {
   handleMouseOut = () => {
     this.handleMouseUp();
     this.clearMousePositionCanvas();
+    this.lastPos = null;
+  }
+
+  handleKeyDown = (e) => {
+    this.changeSpoit(e.altKey);
+  }
+
+  handleKeyUp = (e) => {
+    this.changeSpoit(e.altKey);
+  }
+
+  handleBlur = () => {
+    this.changeSpoit(false);
+  }
+
+  changeSpoit(altKey) {
+    const lastPos = this.lastPos;
+    this.altKey = altKey;
+    if (lastPos) {
+      this.drawMousePosition(lastPos);
+    }
   }
 
   clearMousePositionCanvas() {
@@ -124,16 +154,37 @@ class DrawCanvas extends React.Component {
     }
 
     const { style, canvas } = this.props;
-    const { x, y } = pos;
-    this.clearMousePositionCanvas();
-    ctx.strokeStyle = '#808080';
-    ctx.beginPath();
-    ctx.arc(x, y, (style.get('width') * canvas.get('scale')) / 2, 0, Math.PI * 2, false);
-    ctx.stroke();
+    const { x, y } = pos.original;
+    const circleColor = '#808080';
+
+    if (this.altKey || style.get('type') === 'color-picker') {
+      ctx.beginPath();
+      const radius = 30;
+      const color = this.getCanvasColor(pos.transformed);
+
+      ctx.lineWidth = 10;
+      ctx.strokeStyle = circleColor;
+      ctx.arc(x, y, radius, 0, Math.PI * 2, false);
+      ctx.stroke();
+      ctx.globalCompositeOperation = 'source-over';
+
+      ctx.beginPath();
+      ctx.lineWidth = 8;
+      ctx.strokeStyle = `rgb(${color.r}, ${color.g}, ${color.b})`;
+      ctx.arc(x, y, radius, 0, Math.PI * 2, false);
+      ctx.stroke();
+      ctx.globalCompositeOperation = 'copy';
+    } else {
+      ctx.beginPath();
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = circleColor;
+      ctx.arc(x, y, ((style.get('width') * canvas.get('scale')) / 2), 0, Math.PI * 2, false);
+      ctx.stroke();
+    }
   }
 
   refMouseCircleCtx = (element) => {
-    this.mouseCircleCtx = element && element.getContext('2d');
+    this.mouseCircleCtx = element.getContext('2d');
   }
 
   refMainCanvas = (element) => {
@@ -144,7 +195,8 @@ class DrawCanvas extends React.Component {
     this.mouseHandleElement = element;
   }
 
-  handleSetDrawTempPathMethod = (drawTempPath) => {
+  handleExportFunction = ({ getCanvasColor, drawTempPath }) => {
+    this.getCanvasColor = getCanvasColor;
     this.drawTempPath = (tempPath) => {
       // 未実行のものがあればキャンセル
       if (this.lastRequestAnimationFrameId) {
@@ -173,6 +225,9 @@ class DrawCanvas extends React.Component {
         ref={this.refMouseHandleElement}>
         <EventListener
           target="window"
+          onKeyDown={this.handleKeyDown}
+          onKeyUp={this.handleKeyUp}
+          onBlur={this.handleBlur}
           onResize={this.handleResize} />
         {this.mouseHandleElement && <EventListener
           target={this.mouseHandleElement}
@@ -185,7 +240,7 @@ class DrawCanvas extends React.Component {
           height={height}
           mainCanvas={this.mainCanvas}
           previewCanvas={this.props.previewCanvas}
-          setDrawTempPathMethod={this.handleSetDrawTempPathMethod} />
+          exportFunction={this.handleExportFunction} />
         <div className="canvas-back" style={style} />
         <canvas ref={this.refMainCanvas} />
         <canvas ref={this.refMouseCircleCtx} />
