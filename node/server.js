@@ -31,7 +31,7 @@ async function isJoin(socket, roomId) {
 async function sendInitData(socket, roomId) {
   // TODO: redisになかったらDBから取ってくる
   // 入室者がいない場合は expireをつける
-  const num = await redis.incr(`room:${roomId}:paths:count`);
+  const num = await redis.get(`room:${roomId}:paths:count`);
   const logs = (await redis.hvals(`room:${roomId}:logs`)).map((log) => JSON.parse(log));
   const paths = (await redis.hvals(`room:${roomId}:paths`)).map((path) => JSON.parse(path));
   const users = parseUsers(await redis.hvals(`room:${roomId}:users`));
