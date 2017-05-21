@@ -87,3 +87,6 @@ Style/RedundantSelf:
 
 Style/MultilineOperationIndentation:
   Enabled: false
+
+Style/SymbolArray:
+  Enabled: false

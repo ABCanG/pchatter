@@ -7,7 +7,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <%= csrf_meta_tags %>
     <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track': 'reload' %>
-    <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
+    <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload', async: true %>
+    <%= javascript_pack_tag 'application', 'data-turbolinks-track': 'reload', async: true %>
+    <%= javascript_pack_tag 'chatroom', 'data-turbolinks-track': 'reload', async: true %>
   </head>
   <body>
     <nav class="navbar navbar-default">
@@ -17,7 +19,7 @@
           <% if user_signed_in? %>
             <li><%= link_to '部屋を作る', new_room_path, class: 'navbar-link hidden-xs' %></li>
             <li class="dropdown">
-              <a lass="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+              <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
                 <%= image_tag current_user.icon_url, class: 'dropdown-icon' %>
               </a>
               <ul class="dropdown-menu dropdown-menu-left">
@@ -35,8 +37,10 @@
     </nav>
     <div class="container">
       <% flash.each do |name, msg| %>
-        <div class="alert alert-<%= name == "notice" ? "success" : "danger" %>">
-          <a class="close" data-dismiss="alert">×</a>
+        <div class="alert alert-dismissible fade in alert-<%= name == "notice" ? "success" : "danger" %>" role="alert">
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">×</span>
+          </button>
           <%= msg %>
         </div>
       <% end %>

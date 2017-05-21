@@ -2,7 +2,7 @@ class ApplicationController < ActionController::Base
   class Forbidden < ActionController::ActionControllerError; end
   class IpAddressRejected < ActionController::ActionControllerError; end
 
-  include ErrorHandlers if Rails.env.production? or Rails.env.staging?
+  include ErrorHandlers if Rails.env.production? || Rails.env.staging?
 
   protect_from_forgery with: :exception
   before_action :store_current_location, unless: :skip_store_current_location?

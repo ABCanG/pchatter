@@ -7,6 +7,5 @@ DB_NAME: pchatter
 DB_USER: pchatter
 DB_PASS: password
 DB_SOCKET: /tmp/mysqld.sock
-ENABLE_STACKPROF: 0
 REDIS_HOST: localhost
-REDIS_PORT: 6379
+REDIS_PORT: "6379"

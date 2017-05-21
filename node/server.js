@@ -1,3 +1,4 @@
+require('import-export');
 require('./util/loadenv');
 const io = require('socket.io')(process.env.PORT || 4000);
 const redisAdapter = require('socket.io-redis');

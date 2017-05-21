@@ -7,27 +7,21 @@
 # Ignore bundler config.
 /.bundle
 
-# Ignore the default SQLite database.
-/db/*.sqlite3
-/db/*.sqlite3-journal
-
 # Ignore all logfiles and tempfiles.
 /log/*
 /tmp/*
 !/log/.keep
 !/tmp/.keep
 
-# Ignore Byebug command history file.
-.byebug_history
-# React on Rails
-npm-debug.log*
 node_modules
+yarn-error.log
 
-# Generated js bundles
-/app/assets/webpack/*
+.byebug_history
+/public/packs
 
 /vendor/bundle/
 /config/application.yml
 /generated/*
 /public/assets/*
-
+/public/packs
+/node_modules

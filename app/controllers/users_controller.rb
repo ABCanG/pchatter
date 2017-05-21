@@ -3,8 +3,7 @@ class UsersController < ApplicationController
 
   # GET /users/screen_name
   # GET /users/screen_name.json
-  def show
-  end
+  def show; end
 
   private
 

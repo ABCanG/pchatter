@@ -2,14 +2,20 @@
 
 <%= content_for :outer_container do %>
   <div class="chatroom-wrapper">
-    <%= react_component("ChatApp", props: {
-      id: @room.id,
-      name: @room.name,
-      pass: @room.pass.present?,
-      hidden: @room.hidden,
-      currentUserId: current_user&.id,
-      baseImageUrl: base_image_room_path(@room)
-    }, prerender: false) %>
+    <%= tag('div',
+      id: 'chatroom',
+      class: 'app-holder',
+      data: {
+        props: {
+          id: @room.id,
+          name: @room.name,
+          pass: @room.pass.present?,
+          hidden: @room.hidden,
+          currentUserId: current_user&.id,
+          baseImageUrl: base_image_room_path(@room)
+        }
+      }
+    ) %>
   </div>
 <% end %>
 

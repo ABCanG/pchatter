@@ -4,7 +4,7 @@ const path = require('path');
 const temp = require('temp');
 const mkdirp = require('mkdirp-promise');
 const Canvas = require('canvas');
-const { drawPaths, resizeImage } = require('../../client/commonjs/canvas');
+const { drawPaths, resizeImage } = require('../../app/javascript/common/canvas');
 
 const { Image } = Canvas;
 const tempWidth = 2000;
